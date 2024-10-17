@@ -14,8 +14,16 @@ from lightgbm import LGBMClassifier
 import os
 from sklearn.model_selection import cross_val_score
 
-
+# Ignore warnings and set up logging
 warnings.filterwarnings('ignore')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+# Change the working directory to the script's directory
+
+
 
 
 def predict_action(data: dict, model):
@@ -264,6 +272,7 @@ def add_columns(stock_df):
     Parameters:
     stock_df (DataFrame): DataFrame containing stock data    
     """
+    print(f'Adding columns...')
     # Create new columns with Returns
     stock_df['1_Day_Return'] = (
         stock_df['Close'] - stock_df['Close'].shift(1)) / stock_df['Close'].shift(1) * 100
@@ -360,6 +369,8 @@ def add_columns(stock_df):
         window=50).mean().reset_index(level=0, drop=True)
     stock_df['AVG_Volume_200'] = stock_df.groupby('Symbol')['Volume'].rolling(
         window=200).mean().reset_index(level=0, drop=True)
+    
+    print(f'Halfway There...')
 
     # Doji Candlestick Pattern, identified by a small body and long wicks
     stock_df['Doji'] = stock_df.apply(is_doji, axis=1)
@@ -493,7 +504,9 @@ def scale_data(stock_df):
 
     min_max_scaler = MinMaxScaler()
 
-    stock_df = add_columns(stock_df)
+    if features[10] not in stock_df.columns:
+        stock_df = add_columns(stock_df)
+
     stock_df.replace([float('inf'), float('-inf')], float('nan'), inplace=True)
     
     # Drop rows with NaN values
@@ -530,7 +543,6 @@ def scale_and_obtain_data(symbol, test_size=0.2):
 
     stock_df = get_stock_data(symbol)
     
-    print(f'Adding columns...')
     min_max_scaler = MinMaxScaler()
     stock_df = add_columns(stock_df)
     stock_df.replace([float('inf'), float('-inf')], float('nan'), inplace=True)
@@ -631,40 +643,63 @@ def get_stock_data(symbol):
         new_row = new_row.reset_index(drop=True)
 
         stock_df = pd.concat([stock_df, new_row], ignore_index=True).fillna(0)
+        if stock_df['Date'].tail(2) != new_row['Date'].values:
+            stock_df.to_csv('data/sp500_stocks.csv', index=False)
         return stock_df
+
+
+def tune_hyperparameters(X, y):
+    param_grid = {
+        'num_leaves': [31, 50],
+        'min_data_in_leaf': [20, 50],
+        'max_depth': [-1, 10],
+        'learning_rate': [0.01, 0.1],
+        'n_estimators': [100, 200]
+    }
+    model = LGBMClassifier(random_state=42, verbose=-1)
+    grid_search = GridSearchCV(
+        model, param_grid, cv=3, scoring='accuracy', n_jobs=-1, verbose=0
+    )
+    grid_search.fit(X, y)
+    return grid_search.best_params_
 
 
 def train_models():
     """
-    Trains all models with xbboost and saves them to the models folder.
+    Trains and tunes models with LGBMClassifier and saves them to the models folder.
     """
     company_df = pd.read_csv('data/sp500_companies.csv')
-    features = ['Volume', 'MA_10', 'MA_20', 'MA_50', 'MA_200', 'std_10',
-                'std_20', 'std_50', 'std_200', 'upper_band_10', 'lower_band_10',
-                'upper_band_20', 'lower_band_20', 'upper_band_50', 'lower_band_50',
-                'upper_band_200', 'lower_band_200', 'Golden_Cross_Short', 'Golden_Cross_Medium',
-                'Golden_Cross_Long', 'Death_Cross_Short', 'Death_Cross_Medium', 'Death_Cross_Long',
-                'ROC', 'AVG_Volume_10', 'AVG_Volume_20', 'AVG_Volume_50', 'AVG_Volume_200', 'Doji',
-                'Bullish_Engulfing', 'Bearish_Engulfing', 'MACD', 'Signal', 'MACD_Hist', 'TR', 'ATR',
-                'RSI_10_Day', '10_Day_ROC', 'Resistance_10_Day', 'Support_10_Day', 'Resistance_20_Day',
-                'Support_20_Day', 'Resistance_50_Day', 'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
-                'Volume_MA_50', 'OBV', 'Z-score']
-    for symbol in company_df['Symbol'].unique():
-        print('Loading data for', symbol, '...')
-        stock_df = pd.read_csv('data/sp500_stocks.csv')
-        stock_df = stock_df[stock_df['Symbol'] == symbol]
-        print(f'Adding columns for {symbol}...')
-        stock_df = add_columns(stock_df)
-        preprocessed = scale_data(stock_df)
-        X = preprocessed[features]
-        y = stock_df['Action']
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42)
-        print(f'Training model for {symbol}...')
-        model = xgb.XGBClassifier(n_estimators=100, random_state=42)
-        model.fit(X_train, y_train)
-        print(f'Saving model for {symbol}...')
-        joblib.dump(model, f'models/XGBmodels/{symbol}_model.pkl')
+    skipped = []
+    # Iterate through each stock and train the model
+    for i,stock in enumerate(company_df['Symbol'].unique()):
+        try:
+            # Obtain and scale data for the stock
+            X_train, X_test, y_train, y_test = scale_and_obtain_data(stock)
+            print(f"Training model for {stock} ({i+1}/{len(company_df['Symbol'].unique())})")
+
+            # Hyperparameter tuning (optional)
+            logging.info(f"Tuning hyperparameters for {stock}...")
+            best_params = tune_hyperparameters(X_train, y_train)
+            logging.info(f"Best parameters for {stock}: {best_params}")
+
+
+            # Define and fit the model
+            model = LGBMClassifier(random_state=42, **best_params)
+            model.fit(X_train, y_train)
+
+            # Cross-validation for better evaluation
+            skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+            cv_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
+            logging.info(f"Cross-validation accuracy for {stock}: {cv_scores.mean():.4f}")
+
+            # Save the model
+            joblib.dump(model, f'models/LGBMmodels/{stock}_model.pkl')
+            logging.info(f"Model for {stock} saved successfully")
+
+        except Exception as e:
+            skipped.append(stock)
+            logging.error(f"Error while training model for {stock}: {e}")
+    return skipped
 
 
 def train_model_incrementally():
@@ -947,92 +982,8 @@ def simulate_day_specific(day):
 if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_dir)
-    # Load your stock data (SP500 example)
-
-    """
-    1. VALIDATE THE STOCK MARKET SIMULATION IS PROPERLY WORKING (SHOULD BE)
-    2. TRAIN MORE MODELS ON A FEW STOCKS AND EVALUATE THEM IN THE SIMULATION.
-        - CREATE NEW MODEL TYPES (EXISING MODEL TYPES: OPTIMAL ACTION, SPECIFIC MODEL, GENERAL MODEL)
-            - POSSIBLY TRY NEW MODEL TYPES (EX. LSTM, CNN, ETC.)
-        - CREATE FUNCTION TO TEST MODELS ON YTD DATA IN SIMULATION
-            - SHOULD CHECK WHICH MODEL GAINED THE MOST MONEY, WHICH LOST THE MOST MONEY, ETC. 
-
-    """
-
-    """
-    Try stacking models.
-    Try allowwing the model to sell all stocks at once.
-    See about allwoing model to by multiple stocks at once.
-    """
-    features = ['Volume', 'MA_10', 'MA_20', 'MA_50', 'MA_200', 'std_10',
-                'std_20', 'std_50', 'std_200', 'upper_band_10', 'lower_band_10',
-                'upper_band_20', 'lower_band_20', 'upper_band_50', 'lower_band_50',
-                'upper_band_200', 'lower_band_200', 'Golden_Cross_Short', 'Golden_Cross_Medium',
-                'Golden_Cross_Long', 'Death_Cross_Short', 'Death_Cross_Medium', 'Death_Cross_Long',
-                'ROC', 'AVG_Volume_10', 'AVG_Volume_20', 'AVG_Volume_50', 'AVG_Volume_200', 'Doji',
-                'Bullish_Engulfing', 'Bearish_Engulfing', 'MACD', 'Signal', 'MACD_Hist', 'TR', 'ATR',
-                'RSI_10_Day', '10_Day_ROC', 'Resistance_10_Day', 'Support_10_Day', 'Resistance_20_Day',
-                'Support_20_Day', 'Resistance_50_Day', 'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
-                'Volume_MA_50', 'OBV', 'Z-score']
-
     # Simulate one day for all stocks, continuing from previous cash balances
     # simulate_day_specific(5)
     # simulate_day_general(5)
-    simulate_days(365,to_file=True,massTrade=True)
-    # Setup logging for Jupyter Notebook
-    # logging.basicConfig(
-    #     level=logging.INFO,
-    #     format='%(asctime)s - %(levelname)s - %(message)s'
-    # )
-
-    # # Load simulation results
-    # sim_results = pd.read_csv('simResults/sim_results.csv')
-
-    # # Ensure the models directory exists
-    # os.makedirs('models/LGBMmodels', exist_ok=True)
-
-    # # Function for hyperparameter tuning
-    # def tune_hyperparameters(X, y):
-    #     param_grid = {
-    #         'num_leaves': [31, 50],
-    #         'min_data_in_leaf': [20, 50],
-    #         'max_depth': [-1, 10],
-    #         'learning_rate': [0.01, 0.1],
-    #         'n_estimators': [100, 200]
-    #     }
-    #     model = LGBMClassifier(random_state=42, verbose=-1)
-    #     grid_search = GridSearchCV(
-    #         model, param_grid, cv=3, scoring='accuracy', n_jobs=-1, verbose=0
-    #     )
-    #     grid_search.fit(X, y)
-    #     return grid_search.best_params_
-
-    # # Iterate through each stock and train the model
-    # for stock in sim_results['Stock Name'].unique():
-    #     try:
-    #         # Obtain and scale data for the stock
-    #         X_train, X_test, y_train, y_test = scale_and_obtain_data(stock)
-
-    #         # Hyperparameter tuning (optional)
-    #         logging.info(f"Tuning hyperparameters for {stock}...")
-    #         best_params = tune_hyperparameters(X_train, y_train)
-    #         logging.info(f"Best parameters for {stock}: {best_params}")
-
-
-    #         # Define and fit the model
-    #         model = LGBMClassifier(random_state=42, **best_params)
-    #         model.fit(X_train, y_train)
-
-    #         # Cross-validation for better evaluation
-    #         skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    #         cv_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring='accuracy')
-    #         logging.info(f"Cross-validation accuracy for {stock}: {cv_scores.mean():.4f}")
-
-    #         # Save the model
-    #         joblib.dump(model, f'models/LGBMmodels/{stock}_model.pkl')
-    #         logging.info(f"Model for {stock} saved successfully")
-
-    #     except Exception as e:
-    #         logging.error(f"Error while training model for {stock}: {e}")
-
-
+    train_models()
+    # simulate_days(365,to_file=True,massTrade=True)
