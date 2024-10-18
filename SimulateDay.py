@@ -466,8 +466,8 @@ def add_columns(stock_df):
     stock_df['Z-score'] = (stock_df['Close'] -
                            stock_df['Close'].mean()) / stock_df['Close'].std()
 
-    stock_df = stock_df.fillna(0)
-
+    stock_df.fillna(0, inplace=True)
+    
     stock_df['OBV'] = 0
     for i in range(1, len(stock_df)):
         if stock_df['Close'].iloc[i] > stock_df['Close'].iloc[i - 1]:
@@ -485,6 +485,7 @@ def add_columns(stock_df):
 
 def scale_data(stock_df):
     """
+    !!! Soon to be deprecated !!!
     Scales the data using MinMaxScaler for Model Training.
     Columns Added Within this function. 
 
@@ -541,8 +542,11 @@ def scale_and_obtain_data(symbol, test_size=0.2):
                 'Support_20_Day', 'Resistance_50_Day', 'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
                 'Volume_MA_50', 'OBV', 'Z-score']
 
-    stock_df = get_stock_data(symbol)
+    # stock_df = get_stock_data(symbol)
     
+    stock_df = pd.read_csv('data/sp500_stocks.csv')
+    stock_df = stock_df[stock_df['Symbol'] == symbol]
+
     min_max_scaler = MinMaxScaler()
     stock_df = add_columns(stock_df)
     stock_df.replace([float('inf'), float('-inf')], float('nan'), inplace=True)
@@ -552,6 +556,44 @@ def scale_and_obtain_data(symbol, test_size=0.2):
     stock_df[features] = min_max_scaler.fit_transform(stock_df[features])
     X = stock_df[features]
     y = stock_df['Action']
+    print(f'Splitting data...')
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=42)
+    return X_train, X_test, y_train, y_test
+
+
+def preprocess_data(stock_df, test_size=0.2):
+    """
+    This function preprocesses the stock data and splits it into training and testing sets.
+
+    Parameters:
+    stock_df (DataFrame): DataFrame containing stock data
+    test_size (float): Size of the test set
+
+    Returns:
+    X_train (DataFrame): Training data
+    y_train (DataFrame): Training labels
+    X_test (DataFrame): Testing data
+    y_test (DataFrame): Testing labels
+    """
+    features = ['Volume', 'MA_10', 'MA_20', 'MA_50', 'MA_200', 'std_10',
+                'std_20', 'std_50', 'std_200', 'upper_band_10', 'lower_band_10',
+                'upper_band_20', 'lower_band_20', 'upper_band_50', 'lower_band_50',
+                'upper_band_200', 'lower_band_200', 'Golden_Cross_Short', 'Golden_Cross_Medium',
+                'Golden_Cross_Long', 'Death_Cross_Short', 'Death_Cross_Medium', 'Death_Cross_Long',
+                'ROC', 'AVG_Volume_10', 'AVG_Volume_20', 'AVG_Volume_50', 'AVG_Volume_200', 'Doji',
+                'Bullish_Engulfing', 'Bearish_Engulfing', 'MACD', 'Signal', 'MACD_Hist', 'TR', 'ATR',
+                'RSI_10_Day', '10_Day_ROC', 'Resistance_10_Day', 'Support_10_Day', 'Resistance_20_Day',
+                'Support_20_Day', 'Resistance_50_Day', 'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
+                'Volume_MA_50', 'OBV', 'Z-score']
+    
+    stock_df.dropna(subset=features, inplace=True)
+    min_max_scaler = MinMaxScaler()
+
+    stock_df[features] = min_max_scaler.fit_transform(stock_df[features])
+    X = stock_df[features]
+    y = stock_df['Action']
+
     print(f'Splitting data...')
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=42)
@@ -643,7 +685,8 @@ def get_stock_data(symbol):
         new_row = new_row.reset_index(drop=True)
 
         stock_df = pd.concat([stock_df, new_row], ignore_index=True).fillna(0)
-        if stock_df['Date'].tail(2) != new_row['Date'].values:
+        # Check if the last two dates in stock_df are the same as the date in new_row
+        if not (stock_df['Date'].tail(2).isin(new_row['Date'].values)).all():
             stock_df.to_csv('data/sp500_stocks.csv', index=False)
         return stock_df
 
@@ -669,10 +712,9 @@ def train_models():
     Trains and tunes models with LGBMClassifier and saves them to the models folder.
     """
     company_df = pd.read_csv('data/sp500_companies.csv')
-    skipped = []
     # Iterate through each stock and train the model
     for i,stock in enumerate(company_df['Symbol'].unique()):
-        try:
+        if f"{stock}_model.pkl" not in os.listdir('models/LGBMmodels'):
             # Obtain and scale data for the stock
             X_train, X_test, y_train, y_test = scale_and_obtain_data(stock)
             print(f"Training model for {stock} ({i+1}/{len(company_df['Symbol'].unique())})")
@@ -695,11 +737,6 @@ def train_models():
             # Save the model
             joblib.dump(model, f'models/LGBMmodels/{stock}_model.pkl')
             logging.info(f"Model for {stock} saved successfully")
-
-        except Exception as e:
-            skipped.append(stock)
-            logging.error(f"Error while training model for {stock}: {e}")
-    return skipped
 
 
 def train_model_incrementally():
