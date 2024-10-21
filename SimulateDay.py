@@ -11,7 +11,6 @@ import warnings
 import logging
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from lightgbm import LGBMClassifier
-import os
 from sklearn.model_selection import cross_val_score
 
 # Ignore warnings and set up logging
@@ -277,6 +276,7 @@ def add_columns(stock_df):
     Parameters:
     stock_df (DataFrame): DataFrame containing stock data    
     """
+    warnings.filterwarnings('ignore')
     print(f'Adding columns...')
     # Create new columns with Returns
     stock_df['1_Day_Return'] = (
@@ -867,7 +867,7 @@ def simulate_days(days, cash=10000, existing_shares=0, to_file=False, massTrade=
     all_decisions_s = pd.DataFrame(columns=[
         'Stock Name', 'Day', 'Action', 'Stock Price', 'Cash', 'Shares Held', 'Portfolio Value'])
     stock_data = pd.read_csv('data/sp500_stocks.csv')
-    sp500_stocks = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'XOM', 'META',
+    sp500_stocks = ['AAPL', 'MSFT', 'NFLX', 'TSLA', 'XOM', 'META',
                 'INTC', 'T', 'DIS', 'MMM', 'VZ', 'CCL',
                 'KO', 'JNJ', 'PG', 'WMT', 'MCD', 'PFE']
     # Loop through each stock symbol
@@ -915,7 +915,7 @@ def simulate_days(days, cash=10000, existing_shares=0, to_file=False, massTrade=
             continue
 
     if to_file:
-        all_decisions_s.to_csv('simResults/LGBM_model_decisions.csv',
+        all_decisions_s.to_csv('simResults/sim_results.csv',
                                index=False)
     return all_decisions_s
 
@@ -1066,4 +1066,4 @@ if __name__ == '__main__':
     # simulate_day_specific(7, 'XGB')
     # simulate_day_general(7)
     # train_models()
-    simulate_days(252, to_file=True, massTrade=True)
+    simulate_days(365, to_file=True, massTrade=True)
