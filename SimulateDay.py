@@ -548,7 +548,7 @@ def scale_and_obtain_data(symbol, test_size=0.2, length=1000):
 
     stock_df = get_stock_data(symbol).tail(length)
 
-    # stock_df = pd.read_csv('data/sp500_stocks.csv')
+    # stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     # stock_df = stock_df[stock_df['Symbol'] == symbol]
 
     min_max_scaler = MinMaxScaler()
@@ -608,7 +608,7 @@ def _select_stock():
     """
     Selects a stock from the S&P 500 dataset.
     """
-    stock_df = pd.read_csv('data/sp500_stocks.csv')
+    stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     company_name = input('Enter the name of the company: ')
     return stock_df[stock_df['Symbol'] == company_name]
 
@@ -617,7 +617,7 @@ def fixFuckUp(symbol):
     """
     Adds second to last day if day was skipped.
     """
-    stock_df = pd.read_csv('data/sp500_stocks.csv')
+    stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     stock_df = stock_df[stock_df['Symbol'] == symbol]
     try:
         stock = yf.Ticker(symbol)
@@ -671,7 +671,7 @@ def get_stock_data(symbol):
     Parameters:
     symbol (str): Stock symbol to get data for
     """
-    stock_df = pd.read_csv('data/sp500_stocks.csv')
+    stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     stock_df = stock_df[stock_df['Symbol'] == symbol]
     try:
         stock = yf.Ticker(symbol)
@@ -784,7 +784,7 @@ def train_model_incrementally():
                 'Support_20_Day', 'Resistance_50_Day', 'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
                 'Volume_MA_50', 'OBV', 'Z-score']
 
-    stock_df = pd.read_csv('data/sp500_stocks.csv')
+    stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date']).sort_values(by=['Symbol','Date'])
     print("Data Loaded")
 
     # Initialize an empty DMatrix for incremental training
@@ -866,7 +866,7 @@ def simulate_days(days, cash=10000, existing_shares=0, to_file=False, massTrade=
     # Initialize empty dataframes for storing new decisions
     all_decisions_s = pd.DataFrame(columns=[
         'Stock Name', 'Day', 'Action', 'Stock Price', 'Cash', 'Shares Held', 'Portfolio Value'])
-    stock_data = pd.read_csv('data/sp500_stocks.csv')
+    stock_data = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     sp500_stocks = ['AAPL', 'MSFT', 'NFLX', 'TSLA', 'XOM', 'META',
                 'INTC', 'T', 'DIS', 'MMM', 'VZ', 'CCL',
                 'KO', 'JNJ', 'PG', 'WMT', 'MCD', 'PFE']
@@ -1063,7 +1063,7 @@ if __name__ == '__main__':
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
-    # simulate_day_specific(7, 'XGB')
-    # simulate_day_general(7)
+    simulate_day_specific(8, 'LGBM')
+    # simulate_day_general(8)
     # train_models()
     simulate_days(365, to_file=True, massTrade=True)
