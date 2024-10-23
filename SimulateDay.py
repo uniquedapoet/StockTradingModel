@@ -126,8 +126,7 @@ def stock_market_simulation(model,
                 cash -= stock_price
                 shares_held += 1
             if print_results:
-                print(f"Day {day}: Bought 1 share at {
-                      stock_price}, Cash left: {cash}")
+                print(f"Day {day}: Bought 1 share at {stock_price}, Cash left: {cash}")
 
         # Buy fractional shares if cash is insufficient for a full share
         elif strategy == 'Buy' and cash < stock_price:
@@ -135,8 +134,7 @@ def stock_market_simulation(model,
             shares_held += fractional_shares
             cash = 0
             if print_results:
-                print(f"Day {day}: Bought {fractional_shares} shares at {
-                      stock_price}, Cash left: {cash}")
+                print(f"Day {day}: Bought {fractional_shares} shares at {stock_price}, Cash left: {cash}")
 
         # Sell shares if the strategy is 'Sell' and shares are held
         elif strategy == 'Sell' and shares_held > 0:
@@ -154,8 +152,7 @@ def stock_market_simulation(model,
         # Hold the current position if the strategy is 'Hold'
         elif strategy == 'Hold':
             if print_results:
-                print(f"Day {day}: Holding, Cash: {
-                      cash}, Shares held: {shares_held}")
+                print(f"Day {day}: Holding, Cash: {cash}, Shares held: {shares_held}")
 
         # Calculate the total portfolio value (cash + stock holdings)
         portfolio_value_at_time = cash + (shares_held * stock_price)
@@ -673,37 +670,37 @@ def get_stock_data(symbol):
     """
     stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     stock_df = stock_df[stock_df['Symbol'] == symbol]
-    try:
-        stock = yf.Ticker(symbol)
-        data = stock.history(period='5d', interval='1d')
-    except:
-        stock = yf.Ticker(symbol)
+    if (stock_df['Date'].tail(1).values != datetime.datetime.now().strftime('%Y-%m-%d')):
+        try:
+            stock = yf.Ticker(symbol)
+            data = stock.history(period='5d', interval='1d')
+        except:
+            stock = yf.Ticker(symbol)
 
-        data = stock.history(period='1d', interval='1d')
+            data = stock.history(period='1d', interval='1d')
 
-    if not data.empty:
-        latest_data = data.iloc[-1]
-        time = latest_data.name
-        open_price = latest_data['Open']
-        high = latest_data['High']
-        low = latest_data['Low']
-        close = latest_data['Close']
-        volume = latest_data['Volume']
-        new_row = pd.DataFrame({
-            'Symbol': [symbol],
-            'Date': [datetime.datetime.strftime(time, '%Y-%m-%d')],
-            'Open': [open_price],
-            'High': [high],
-            'Low': [low],
-            'Close': [close],
-            'Volume': [volume]
-        })
+        if not data.empty:
+            latest_data = data.iloc[-1]
+            time = latest_data.name
+            open_price = latest_data['Open']
+            high = latest_data['High']
+            low = latest_data['Low']
+            close = latest_data['Close']
+            volume = latest_data['Volume']
+            new_row = pd.DataFrame({
+                'Symbol': [symbol],
+                'Date': [datetime.datetime.strftime(time, '%Y-%m-%d')],
+                'Open': [open_price],
+                'High': [high],
+                'Low': [low],
+                'Close': [close],
+                'Volume': [volume]
+            })
 
-        new_row = new_row.reset_index(drop=True)
+            new_row = new_row.reset_index(drop=True)
 
-        stock_df = pd.concat([stock_df, new_row], ignore_index=True).fillna(0)
-        # Check if the last two dates in stock_df are the same as the date in new_row
-        if not (stock_df['Date'].tail(2).isin(new_row['Date'].values)).all():
+            stock_df = pd.concat([stock_df, new_row], ignore_index=True).fillna(0)
+            # Check if the last two dates in stock_df are the same as the date in new_row
             row = pd.DataFrame({
                 'Date': [datetime.datetime.strftime(time, '%Y-%m-%d')],
                 'Symbol': [symbol],
@@ -715,8 +712,8 @@ def get_stock_data(symbol):
                 'Volume': [volume]
             })
             row.to_csv('data/sp500_stocks.csv',
-                       index=False, mode='a', header=False)
-        return stock_df
+                        index=False, mode='a', header=False)
+    return stock_df
 
 
 def tune_hyperparameters(X, y):
@@ -745,8 +742,7 @@ def train_models():
         if f"{stock}_model.pkl" not in os.listdir('models/LGBMmodels'):
             # Obtain and scale data for the stock
             X_train, X_test, y_train, y_test = scale_and_obtain_data(stock)
-            print(f"Training model for {
-                  stock} ({i+1}/{len(company_df['Symbol'].unique())})")
+            print(f"Training model for {stock} ({i+1}/{len(company_df['Symbol'].unique())})")
 
             # Hyperparameter tuning (optional)
             logging.info(f"Tuning hyperparameters for {stock}...")
@@ -875,7 +871,6 @@ def simulate_days(days, cash=10000, existing_shares=0, to_file=False, massTrade=
         try:
             # Get the most recent stock_data
             updated_stock_df = get_stock_data(symbol)
-            updated_stock_df = fixFuckUp(symbol)
             updated_stock_df = updated_stock_df.tail(days)
 
             # updated_stock_df = stock_data[stock_data['Symbol'] == symbol].tail(1)
@@ -1063,7 +1058,8 @@ if __name__ == '__main__':
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
-    simulate_day_specific(8, 'LGBM')
-    # simulate_day_general(8)
+    # simulate_days(256, to_file=True, massTrade=True)
+    simulate_day_specific(9, 'LGBM') 
+    simulate_day_specific(9, 'XGB') 
+    simulate_day_general(9)
     # train_models()
-    simulate_days(365, to_file=True, massTrade=True)
