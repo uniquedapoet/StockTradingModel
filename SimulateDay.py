@@ -673,7 +673,7 @@ def get_stock_data(symbol):
     if (stock_df['Date'].tail(1).values != datetime.datetime.now().strftime('%Y-%m-%d')):
         try:
             stock = yf.Ticker(symbol)
-            data = stock.history(period='5d', interval='1d')
+            data = stock.history(period='1d', interval='1d')
         except:
             stock = yf.Ticker(symbol)
 
@@ -867,7 +867,7 @@ def simulate_days(days, cash=10000, existing_shares=0, to_file=False, massTrade=
                 'INTC', 'T', 'DIS', 'MMM', 'VZ', 'CCL',
                 'KO', 'JNJ', 'PG', 'WMT', 'MCD', 'PFE']
     # Loop through each stock symbol
-    for symbol in sp500_stocks:
+    for symbol in stock_data['Symbol'].unique():    
         try:
             # Get the most recent stock_data
             updated_stock_df = get_stock_data(symbol)
@@ -910,7 +910,7 @@ def simulate_days(days, cash=10000, existing_shares=0, to_file=False, massTrade=
             continue
 
     if to_file:
-        all_decisions_s.to_csv('simResults/sim_results.csv',
+        all_decisions_s.to_csv('simResults/LGBM_model_decisions.csv',
                                index=False)
     return all_decisions_s
 
@@ -975,7 +975,7 @@ def simulate_day_general(day):
                            mode='a', header=False, index=False)
 
 
-def simulate_day_specific(day, model_type='LGBM'):
+def simulate_day_specific(model_type='LGBM'):
     """
     Simulates a day of trading for all stocks using the specific model.
     Models used: {symbol}_model.pkl XGBClassifier
@@ -1005,7 +1005,7 @@ def simulate_day_specific(day, model_type='LGBM'):
             # Set the starting cash and shares for the current simulation
             cash_s = last_row_s['Cash']
             existing_shares = last_row_s['Shares Held']
-
+            day = last_row_s['Day'] +1
             updated_stock_df = get_stock_data(symbol)
             updated_stock_df = updated_stock_df.tail(1)
 
@@ -1058,8 +1058,6 @@ if __name__ == '__main__':
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
-    # simulate_days(256, to_file=True, massTrade=True)
-    simulate_day_specific(9, 'LGBM') 
-    simulate_day_specific(9, 'XGB') 
-    simulate_day_general(9)
+    simulate_days(11, to_file=True, massTrade=True)
+    simulate_day_specific('XGB') 
     # train_models()
