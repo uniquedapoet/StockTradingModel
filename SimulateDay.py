@@ -562,8 +562,8 @@ def scale_and_obtain_data(symbol: str,
                 'Support_20_Day', 'Resistance_50_Day', 'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
                 'Volume_MA_50', 'OBV', 'Z-score']
 
-    stock_df = get_stock_data(symbol).tail(length)
-
+    start_date = '2010-01-01'
+    stock_df = yf.download(symbol, start=start_date)
     # stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     # stock_df = stock_df[stock_df['Symbol'] == symbol]
 
@@ -794,6 +794,34 @@ def train_models():
             logging.info(f"Model for {stock} saved successfully")
 
 
+def train_model(stock: str):
+    # Obtain and scale data for the stock
+    X_train, _, y_train, _ = scale_and_obtain_data(stock)
+    print(f"Training model for {stock}")
+
+    # Hyperparameter tuning (optional)
+    logging.info(f"Tuning hyperparameters for {stock}...")
+    best_params = tune_hyperparameters(X_train, y_train)
+    logging.info(f"Best parameters for {stock}: {best_params}")
+
+    # Define and fit the model
+    model = LGBMClassifier(random_state=42, **best_params)
+    model.fit(X_train, y_train)
+
+    # Cross-validation for better evaluation
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_scores = cross_val_score(
+        model, X_train, y_train, cv=skf, scoring='accuracy')
+    logging.info(
+        f"Cross-validation accuracy for {stock}: {cv_scores.mean():.4f}")
+
+    # Save the model
+    joblib.dump(model, f'models/LGBMmodels/{stock}_model.pkl')
+    logging.info(f"Model for {stock} saved successfully")
+
+    return joblib.load(f'models/LGBMmodels/{stock}_model.pkl')
+
+
 def train_model_incrementally():
     """
     Trains a model incrementally on all stocks in the S&P 500 dataset.
@@ -882,7 +910,9 @@ def simulate_days(days: int,
                   existing_shares: float = 0,
                   to_file: bool = False,
                   massTrade: bool = False,
-                  monthly_injection: int = 0) -> pd.DataFrame:
+                  monthly_injection: int = 0,
+                  file_location: str = None,
+                  symbols: list = None) -> pd.DataFrame:
     """
     Simulates a number of days of trading for all stocks using the specific model.
     Models used: {symbol}_model.pkl LGBMClassifier
@@ -899,13 +929,17 @@ def simulate_days(days: int,
         'Stock Name', 'Day', 'Action', 'Stock Price', 'Cash', 'Shares Held', 'Portfolio Value'])
     stock_data = pd.read_csv(
         'data/sp500_stocks.csv').sort_values(by=['Symbol', 'Date'])
-    sp500_stocks = ['AAPL', 'MSFT', 'NFLX', 'TSLA', 'XOM', 'META',
-                    'INTC', 'T', 'DIS', 'MMM', 'VZ', 'CCL', 'NVDA',
-                    'KO', 'JNJ', 'PG', 'WMT', 'MCD', 'PFE','AMZN',
-                    "WBA", "DLTR", "HUM", "LULU", "NKE", "TGT",
-                    'VST','CEG',"HWM"]
+    if symbols:
+        test_stocks = symbols
+    else:
+        test_stocks = ['AAPL', 'MSFT', 'NFLX', 'TSLA', 'XOM', 'META',
+                       'INTC', 'T', 'DIS', 'MMM', 'VZ', 'CCL', 'NVDA',
+                       'KO', 'JNJ', 'PG', 'WMT', 'MCD', 'PFE', 'AMZN',
+                       "WBA", "DLTR", "HUM", "LULU", "NKE", "TGT",
+                       'VST', 'CEG', "HWM"]
+
     # Loop through each stock symbol
-    for symbol in sp500_stocks:
+    for symbol in test_stocks:
         try:
             # Get the most recent stock_data
             updated_stock_df = get_stock_data(symbol)
@@ -919,11 +953,9 @@ def simulate_days(days: int,
                     f'models/LGBMmodels/{symbol}_model.pkl')
                 print(f"Using model for {symbol}")
             except Exception:
-                general_model = xgb.Booster()
-                general_model.load_model(
-                    'models/XGBmodels/all_stocks_incremental_model.pkl')
-                specific_model = general_model
-                print(f"Using general model for {symbol}")
+                print(f"Model for {symbol} not found. Training a new model...")
+                specific_model = train_model(symbol)
+                print(f"Model trained for {symbol}")
 
             # Simulate a day of trading for the stock with the specific model
             new_decisions_s, _ = stock_market_simulation(
@@ -948,9 +980,12 @@ def simulate_days(days: int,
             print("====================================")
             continue
 
-    if to_file:
-        all_decisions_s.to_csv('simResults/sim_results.csv',
-                               index=False)
+    if to_file or file_location:
+        if file_location:
+            all_decisions_s.to_csv(file_location, index=False, mode='a')
+        else:
+            all_decisions_s.to_csv('simResults/sim_results.csv',
+                                   index=False)
     return all_decisions_s
 
 
@@ -1101,6 +1136,14 @@ if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
     # simulate_days(256, to_file=True, massTrade=True, cash=10000)
-    simulate_day_specific('XGB')
-    simulate_day_specific('LGBM')
+    # simulate_day_specific('XGB')
+    # simulate_day_specific('LGBM')
     # train_models()
+    # scale_and_obtain_data('AAPL')
+    portfolio = pd.read_csv('CashAppIntegration/CashAppStockManagment.py')
+    simulate_days(days=1,
+                cash=portfolio['Cash'].iloc[-1],
+                existing_shares=portfolio[portfolio['Stock'] == stock]['Shares'].iloc[-1],
+                file_location="CashAppIntegration/CashAppStockManagment.py",
+                symbols=portfolio['Stock'].unique()
+                )
