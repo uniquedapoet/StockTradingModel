@@ -1100,7 +1100,7 @@ if __name__ == '__main__':
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
-    simulate_days(256, to_file=True, massTrade=True, cash=10000)
-    # simulate_day_specific('XGB')
-    # simulate_day_specific('LGBM')
+    # simulate_days(256, to_file=True, massTrade=True, cash=10000)
+    simulate_day_specific('XGB')
+    simulate_day_specific('LGBM')
     # train_models()
