@@ -77,7 +77,8 @@ def stock_market_simulation(model,
                             oneDay=False,
                             verbose: bool = False,
                             masstrades: bool = False,
-                            monthly_injection: int = 0) -> tuple[pd.DataFrame, int]:
+                            monthly_injection: int = 0,
+                            descision: pd.DataFrame = None) -> tuple[pd.DataFrame, int]:
     """
     Simulates the stock market using the given model and stock data.
 
@@ -101,9 +102,9 @@ def stock_market_simulation(model,
     shares_held = existing_shares
     portfolio_value = []
     scaled = scale_data(stock)
-    modelDecisionDf = pd.DataFrame(
+    modelDecisionDf = (pd.DataFrame(
         columns=['Stock Name', 'Day', 'Action', 'Cash',
-                 'Shares Held', 'Portfolio Value', 'Stock Price'])
+                 'Shares Held', 'Portfolio Value', 'Stock Price']) if descision is None else descision)
 
     days = min(days, len(stock))
 
@@ -324,8 +325,9 @@ def add_columns(stock_df: pd.DataFrame
     stock_df['volume_lag5'] = stock_df['Volume'].shift(10)
 
     # Create new columns with Moving Averages and Standard Deviations
+    stock_df.reset_index(inplace=True)
     stock_df['Date'] = pd.to_datetime(stock_df['Date'])
-
+    # stock_df['Symbol'] = stock_df['St']
     stock_df['MA_10'] = stock_df.groupby('Symbol')['Close'].rolling(
         window=10).mean().reset_index(level=0, drop=True)
     stock_df['MA_20'] = stock_df.groupby('Symbol')['Close'].rolling(
@@ -564,6 +566,8 @@ def scale_and_obtain_data(symbol: str,
 
     start_date = '2010-01-01'
     stock_df = yf.download(symbol, start=start_date)
+    stock_df['Symbol'] = symbol
+
     # stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     # stock_df = stock_df[stock_df['Symbol'] == symbol]
 
@@ -694,9 +698,10 @@ def get_stock_data(symbol: str
     Parameters:
     symbol (str): Stock symbol to get data for
     """
-    stock_df = pd.read_csv(
-        'data/sp500_stocks.csv').sort_values(by=['Symbol', 'Date'])
-    stock_df = stock_df[stock_df['Symbol'] == symbol]
+    start_date = '2010-01-01'
+    stock_df = yf.download(symbol, start=start_date)
+    stock_df['Symbol'] = symbol
+    stock_df.reset_index(inplace=True)
     if (stock_df['Date'].tail(1).values != datetime.datetime.now().strftime('%Y-%m-%d')):
         try:
             stock = yf.Ticker(symbol)
@@ -1140,10 +1145,6 @@ if __name__ == '__main__':
     # simulate_day_specific('LGBM')
     # train_models()
     # scale_and_obtain_data('AAPL')
-    portfolio = pd.read_csv('CashAppIntegration/CashAppStockManagment.py')
-    simulate_days(days=1,
-                cash=portfolio['Cash'].iloc[-1],
-                existing_shares=portfolio[portfolio['Stock'] == stock]['Shares'].iloc[-1],
-                file_location="CashAppIntegration/CashAppStockManagment.py",
-                symbols=portfolio['Stock'].unique()
-                )
+    INTC_data = get_stock_data('INTC')
+    INTC_data = add_columns(INTC_data)
+    INTC_data.to_csv('data/INTC_data.csv', index=False)
