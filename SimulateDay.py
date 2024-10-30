@@ -74,7 +74,7 @@ def stock_market_simulation(model,
                             days: int,
                             stock: pd.DataFrame,
                             existing_shares: int = 0,
-                            oneDay=False,
+                            oneDay=None,
                             verbose: bool = False,
                             masstrades: bool = False,
                             monthly_injection: int = 0,
@@ -181,9 +181,11 @@ def stock_market_simulation(model,
             'Shares Held': [shares_held],
             'Portfolio Value': [portfolio_value_at_time]
         })
-        modelDecisionDf = pd.concat(
-            [modelDecisionDf, new_row], ignore_index=True)
-
+        if descision is None:
+            modelDecisionDf = pd.concat(
+                [modelDecisionDf, new_row], ignore_index=True)
+        else:
+            modelDecisionDf = new_row
     # Final results
     final_portfolio_value = cash + (shares_held * stock['Close'].iloc[-1])
     if verbose:
@@ -1140,11 +1142,8 @@ if __name__ == '__main__':
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
-    # simulate_days(256, to_file=True, massTrade=True, cash=10000)
+    simulate_days(1000, to_file=True, massTrade=True, cash=10000)
     # simulate_day_specific('XGB')
     # simulate_day_specific('LGBM')
     # train_models()
     # scale_and_obtain_data('AAPL')
-    INTC_data = get_stock_data('INTC')
-    INTC_data = add_columns(INTC_data)
-    INTC_data.to_csv('data/INTC_data.csv', index=False)

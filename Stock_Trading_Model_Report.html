@@ -7483,7 +7483,7 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="Comprehensive-Stock-Trading-Model-Using-Machine-Learning-and-Technical-Indicators">Comprehensive Stock Trading Model Using Machine Learning and Technical Indicators<a class="anchor-link" href="#Comprehensive-Stock-Trading-Model-Using-Machine-Learning-and-Technical-Indicators">¶</a></h1><h2 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">¶</a></h2><p>This project presents a machine learning-based stock trading model for S&amp;P 500 stocks, utilizing a combination of technical indicators and machine learning algorithms. The model is designed to predict stock price movements and generate actionable trading signals, adopting a conservative trading approach by limiting its trades to one share per day.</p>
-<p>The focus of this model is to maximize profitability while minimizing risk over the long term. Using Yahoo Finance data spanning from 2010 to the present, the model analyzes historical price data, volume, and technical indicators to make informed buy and sell decisions. Tested via a stock market simulation, the model demonstrates an average return of <strong>12% profit</strong> in the past year in the market.</p>
+<p>The focus of this model is to maximize profitability while minimizing risk over the long term. Using Yahoo Finance data spanning from 2010 to the present, the model analyzes historical price data, volume, and technical indicators to make informed buy and sell decisions. Tested via a stock market simulation, the model demonstrates an average return of <strong>12% profit</strong> in the past 365 market days.</p>
 </div>
 </div>
 </div>
@@ -7503,7 +7503,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [66]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">SimulateDay</span> <span class="kn">import</span> <span class="n">get_stock_data</span><span class="p">,</span> <span class="n">preprocess_data</span><span class="p">,</span> <span class="n">add_columns</span><span class="p">,</span> <span class="n">stock_market_simulation</span>
@@ -7517,7 +7517,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [67]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">symbol</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">'Enter the name of the company: '</span><span class="p">)</span>
@@ -7532,8 +7532,15 @@ a.anchor-link {
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>[*********************100%***********************]  1 of 1 completed
+</pre>
+</div>
+</div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[67]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7554,70 +7561,70 @@ a.anchor-link {
 <tr style="text-align: right;">
 <th></th>
 <th>Date</th>
-<th>Symbol</th>
-<th>Adj Close</th>
-<th>Close</th>
+<th>Open</th>
 <th>High</th>
 <th>Low</th>
-<th>Open</th>
+<th>Close</th>
+<th>Adj Close</th>
 <th>Volume</th>
+<th>Symbol</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<th>1777298</th>
-<td>2024-10-18</td>
-<td>VST</td>
-<td>131.160004</td>
-<td>131.160004</td>
-<td>132.259995</td>
-<td>125.370003</td>
-<td>127.300003</td>
-<td>5841517.0</td>
+<th>3727</th>
+<td>2024-10-24 00:00:00</td>
+<td>140.820007</td>
+<td>141.350006</td>
+<td>138.460007</td>
+<td>140.410004</td>
+<td>140.410004</td>
+<td>172354900.0</td>
+<td>NVDA</td>
 </tr>
 <tr>
-<th>1777299</th>
-<td>2024-10-21</td>
-<td>VST</td>
-<td>129.330795</td>
-<td>129.330795</td>
-<td>133.429901</td>
-<td>127.810303</td>
-<td>131.580002</td>
-<td>2609003.0</td>
+<th>3728</th>
+<td>2024-10-25 00:00:00</td>
+<td>140.929993</td>
+<td>144.130005</td>
+<td>140.800003</td>
+<td>141.539993</td>
+<td>141.539993</td>
+<td>205122100.0</td>
+<td>NVDA</td>
 </tr>
 <tr>
-<th>1777300</th>
-<td>2024-10-22</td>
-<td>VST</td>
-<td>125.885002</td>
-<td>125.885002</td>
-<td>128.879898</td>
-<td>124.699997</td>
-<td>128.000000</td>
-<td>3486644.0</td>
+<th>3729</th>
+<td>2024-10-28 00:00:00</td>
+<td>143.000000</td>
+<td>143.139999</td>
+<td>140.050003</td>
+<td>140.520004</td>
+<td>140.520004</td>
+<td>173586700.0</td>
+<td>NVDA</td>
 </tr>
 <tr>
-<th>1874650</th>
-<td>2024-10-23</td>
-<td>VST</td>
-<td>126.110001</td>
-<td>126.110001</td>
-<td>128.699905</td>
-<td>123.129997</td>
-<td>124.000000</td>
-<td>4073560.0</td>
+<th>3730</th>
+<td>2024-10-29 00:00:00</td>
+<td>140.250000</td>
+<td>142.255005</td>
+<td>138.899994</td>
+<td>141.250000</td>
+<td>141.250000</td>
+<td>151091708.0</td>
+<td>NVDA</td>
 </tr>
 <tr>
-<th>1874926</th>
-<td>2024-10-24</td>
-<td>VST</td>
-<td>125.019997</td>
-<td>125.019997</td>
-<td>127.103996</td>
-<td>123.339996</td>
-<td>125.910004</td>
-<td>2016265.0</td>
+<th>3731</th>
+<td>2024-10-29</td>
+<td>140.250000</td>
+<td>142.255005</td>
+<td>138.899994</td>
+<td>141.250000</td>
+<td>0.000000</td>
+<td>151091708.0</td>
+<td>NVDA</td>
 </tr>
 </tbody>
 </table>
@@ -7642,7 +7649,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [68]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">stock_data</span> <span class="o">=</span> <span class="n">add_columns</span><span class="p">(</span><span class="n">stock_data</span><span class="p">)</span>
@@ -7665,7 +7672,7 @@ Halfway There...
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[68]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[3]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7685,16 +7692,16 @@ Halfway There...
 <thead>
 <tr style="text-align: right;">
 <th></th>
+<th>index</th>
 <th>Date</th>
-<th>Symbol</th>
-<th>Adj Close</th>
-<th>Close</th>
+<th>Open</th>
 <th>High</th>
 <th>Low</th>
-<th>Open</th>
+<th>Close</th>
+<th>Adj Close</th>
 <th>Volume</th>
+<th>Symbol</th>
 <th>1_Day_Return</th>
-<th>5_Day_Return</th>
 <th>...</th>
 <th>Support_20_Day</th>
 <th>Resistance_50_Day</th>
@@ -7710,128 +7717,128 @@ Halfway There...
 </thead>
 <tbody>
 <tr>
-<th>1777298</th>
-<td>2024-10-18</td>
-<td>VST</td>
-<td>131.160004</td>
-<td>131.160004</td>
-<td>132.259995</td>
-<td>125.370003</td>
-<td>127.300003</td>
-<td>5841517.0</td>
-<td>3.056500</td>
-<td>4.685133</td>
-<td>...</td>
-<td>111.629997</td>
-<td>138.410004</td>
-<td>73.699997</td>
-<td>9458115.5</td>
-<td>10287552.75</td>
-<td>7562749.10</td>
-<td>Hold</td>
-<td>2</td>
-<td>5.415071</td>
-<td>358926055</td>
-</tr>
-<tr>
-<th>1777299</th>
-<td>2024-10-21</td>
-<td>VST</td>
-<td>129.330795</td>
-<td>129.330795</td>
-<td>133.429901</td>
-<td>127.810303</td>
-<td>131.580002</td>
-<td>2609003.0</td>
-<td>-1.394639</td>
-<td>-2.214728</td>
-<td>...</td>
-<td>112.400002</td>
-<td>138.410004</td>
-<td>73.699997</td>
-<td>8151785.8</td>
-<td>9637252.90</td>
-<td>7503203.16</td>
-<td>Hold</td>
-<td>1</td>
-<td>5.319553</td>
-<td>356317052</td>
-</tr>
-<tr>
-<th>1777300</th>
-<td>2024-10-22</td>
-<td>VST</td>
-<td>125.885002</td>
-<td>125.885002</td>
-<td>128.879898</td>
-<td>124.699997</td>
-<td>128.000000</td>
-<td>3486644.0</td>
-<td>-2.664325</td>
-<td>-1.874652</td>
-<td>...</td>
-<td>114.160004</td>
-<td>138.410004</td>
-<td>73.699997</td>
-<td>7600210.2</td>
-<td>9325450.10</td>
-<td>7464584.04</td>
-<td>Hold</td>
-<td>1</td>
-<td>5.139619</td>
-<td>352830408</td>
-</tr>
-<tr>
-<th>1874650</th>
-<td>2024-10-23</td>
-<td>VST</td>
-<td>126.110001</td>
-<td>126.110001</td>
-<td>128.699905</td>
-<td>123.129997</td>
-<td>124.000000</td>
-<td>4073560.0</td>
-<td>0.178733</td>
-<td>-7.060212</td>
-<td>...</td>
-<td>114.160004</td>
-<td>138.410004</td>
-<td>73.699997</td>
-<td>7029446.2</td>
-<td>8735708.10</td>
-<td>7416145.24</td>
-<td>Hold</td>
-<td>0</td>
-<td>5.151368</td>
-<td>356903968</td>
-</tr>
-<tr>
-<th>1874926</th>
+<th>3727</th>
+<td>3727</td>
 <td>2024-10-24</td>
-<td>VST</td>
-<td>125.019997</td>
-<td>125.019997</td>
-<td>127.103996</td>
-<td>123.339996</td>
-<td>125.910004</td>
-<td>2016265.0</td>
-<td>-0.864328</td>
-<td>-1.767895</td>
+<td>140.820007</td>
+<td>141.350006</td>
+<td>138.460007</td>
+<td>140.410004</td>
+<td>140.410004</td>
+<td>172354900.0</td>
+<td>NVDA</td>
+<td>0.609061</td>
 <td>...</td>
-<td>117.720001</td>
-<td>138.410004</td>
-<td>73.699997</td>
-<td>6646822.7</td>
-<td>8187151.35</td>
-<td>7353576.54</td>
+<td>117.000000</td>
+<td>143.710007</td>
+<td>102.830002</td>
+<td>247694500.0</td>
+<td>256986000.0</td>
+<td>2.996149e+08</td>
 <td>Hold</td>
 <td>0</td>
-<td>5.094449</td>
-<td>354887703</td>
+<td>5.141754</td>
+<td>107811071600</td>
+</tr>
+<tr>
+<th>3728</th>
+<td>3728</td>
+<td>2024-10-25</td>
+<td>140.929993</td>
+<td>144.130005</td>
+<td>140.800003</td>
+<td>141.539993</td>
+<td>141.539993</td>
+<td>205122100.0</td>
+<td>NVDA</td>
+<td>0.804779</td>
+<td>...</td>
+<td>117.000000</td>
+<td>143.710007</td>
+<td>102.830002</td>
+<td>251185760.0</td>
+<td>253691645.0</td>
+<td>2.973556e+08</td>
+<td>Hold</td>
+<td>0</td>
+<td>5.187212</td>
+<td>108016193700</td>
+</tr>
+<tr>
+<th>3729</th>
+<td>3729</td>
+<td>2024-10-28</td>
+<td>143.000000</td>
+<td>143.139999</td>
+<td>140.050003</td>
+<td>140.520004</td>
+<td>140.520004</td>
+<td>173586700.0</td>
+<td>NVDA</td>
+<td>-0.720637</td>
+<td>...</td>
+<td>117.000000</td>
+<td>143.710007</td>
+<td>102.830002</td>
+<td>245309660.0</td>
+<td>251043295.0</td>
+<td>2.947755e+08</td>
+<td>Hold</td>
+<td>0</td>
+<td>5.146179</td>
+<td>107842607000</td>
+</tr>
+<tr>
+<th>3730</th>
+<td>3730</td>
+<td>2024-10-29</td>
+<td>140.250000</td>
+<td>142.255005</td>
+<td>138.899994</td>
+<td>141.250000</td>
+<td>141.250000</td>
+<td>151091708.0</td>
+<td>NVDA</td>
+<td>0.519496</td>
+<td>...</td>
+<td>118.849998</td>
+<td>143.710007</td>
+<td>102.830002</td>
+<td>222635730.8</td>
+<td>243493155.4</td>
+<td>2.914307e+08</td>
+<td>Hold</td>
+<td>0</td>
+<td>5.175546</td>
+<td>107993698708</td>
+</tr>
+<tr>
+<th>3731</th>
+<td>3731</td>
+<td>2024-10-29</td>
+<td>140.250000</td>
+<td>142.255005</td>
+<td>138.899994</td>
+<td>141.250000</td>
+<td>0.000000</td>
+<td>151091708.0</td>
+<td>NVDA</td>
+<td>0.000000</td>
+<td>...</td>
+<td>122.849998</td>
+<td>143.710007</td>
+<td>102.830002</td>
+<td>211256931.6</td>
+<td>239955445.8</td>
+<td>2.884508e+08</td>
+<td>Hold</td>
+<td>0</td>
+<td>5.175546</td>
+<td>107993698708</td>
 </tr>
 </tbody>
 </table>
-<p>5 rows × 81 columns</p>
+<p>5 rows × 82 columns</p>
 </div>
 </div>
 </div>
@@ -7895,7 +7902,7 @@ Halfway There...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [69]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">preprocess_data</span><span class="p">(</span><span class="n">stock_data</span><span class="p">)</span>
@@ -8015,7 +8022,7 @@ This has been done for every stock in the sp500 individually to maximixe model p
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [71]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">results</span>
@@ -8029,7 +8036,7 @@ This has been done for every stock in the sp500 individually to maximixe model p
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[71]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8062,58 +8069,58 @@ This has been done for every stock in the sp500 individually to maximixe model p
 <tbody>
 <tr>
 <th>0</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>0</td>
 <td>Buy</td>
-<td>9975.200001</td>
+<td>9968.736000</td>
 <td>1</td>
 <td>10000.000000</td>
-<td>24.799999</td>
-<td>2023-05-15</td>
+<td>31.264000</td>
+<td>2023-05-19</td>
 </tr>
 <tr>
 <th>1</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>1</td>
 <td>Buy</td>
-<td>9950.850000</td>
+<td>9937.559999</td>
 <td>2</td>
-<td>9999.550001</td>
-<td>24.350000</td>
-<td>2023-05-16</td>
+<td>9999.912001</td>
+<td>31.176001</td>
+<td>2023-05-22</td>
 </tr>
 <tr>
 <th>2</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>2</td>
 <td>Buy</td>
-<td>9926.500000</td>
+<td>9906.872000</td>
 <td>3</td>
-<td>9999.550001</td>
-<td>24.350000</td>
-<td>2023-05-17</td>
+<td>9998.935999</td>
+<td>30.688000</td>
+<td>2023-05-23</td>
 </tr>
 <tr>
 <th>3</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>3</td>
 <td>Buy</td>
-<td>9902.059999</td>
+<td>9876.334000</td>
 <td>4</td>
-<td>9999.820002</td>
-<td>24.440001</td>
-<td>2023-05-18</td>
+<td>9998.486000</td>
+<td>30.538000</td>
+<td>2023-05-24</td>
 </tr>
 <tr>
 <th>4</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>4</td>
-<td>Buy</td>
-<td>9877.549999</td>
-<td>5</td>
-<td>10000.100000</td>
-<td>24.510000</td>
-<td>2023-05-19</td>
+<td>Hold</td>
+<td>9876.334000</td>
+<td>4</td>
+<td>10028.253998</td>
+<td>37.980000</td>
+<td>2023-05-25</td>
 </tr>
 <tr>
 <th>...</th>
@@ -8128,58 +8135,58 @@ This has been done for every stock in the sp500 individually to maximixe model p
 </tr>
 <tr>
 <th>251</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>251</td>
 <td>Buy</td>
-<td>880.300041</td>
-<td>319.412575</td>
-<td>30096.968652</td>
-<td>91.470001</td>
-<td>2024-05-14</td>
+<td>0.000000</td>
+<td>216.155103</td>
+<td>20487.180425</td>
+<td>94.779999</td>
+<td>2024-05-20</td>
 </tr>
 <tr>
 <th>252</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>252</td>
-<td>Hold</td>
-<td>880.300041</td>
-<td>319.412575</td>
-<td>31834.573839</td>
-<td>96.910004</td>
-<td>2024-05-15</td>
+<td>Buy</td>
+<td>0.000000</td>
+<td>216.155103</td>
+<td>20618.171025</td>
+<td>95.386002</td>
+<td>2024-05-21</td>
 </tr>
 <tr>
 <th>253</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>253</td>
 <td>Buy</td>
-<td>787.160042</td>
-<td>320.412575</td>
-<td>30630.387067</td>
-<td>93.139999</td>
-<td>2024-05-16</td>
+<td>0.000000</td>
+<td>216.155103</td>
+<td>20523.926397</td>
+<td>94.949997</td>
+<td>2024-05-22</td>
 </tr>
 <tr>
 <th>254</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>254</td>
-<td>Buy</td>
-<td>693.080040</td>
-<td>321.412575</td>
-<td>30931.575669</td>
-<td>94.080002</td>
-<td>2024-05-17</td>
+<td>Hold</td>
+<td>0.000000</td>
+<td>216.155103</td>
+<td>22436.684344</td>
+<td>103.799004</td>
+<td>2024-05-23</td>
 </tr>
 <tr>
 <th>255</th>
-<td>VST</td>
+<td>NVDA</td>
 <td>255</td>
 <td>Buy</td>
-<td>601.570038</td>
-<td>322.412575</td>
-<td>30105.545450</td>
-<td>91.510002</td>
-<td>2024-05-20</td>
+<td>0.000000</td>
+<td>216.155103</td>
+<td>23013.818074</td>
+<td>106.469002</td>
+<td>2024-05-24</td>
 </tr>
 </tbody>
 </table>
@@ -8205,7 +8212,7 @@ This has been done for every stock in the sp500 individually to maximixe model p
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [72]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
@@ -8284,7 +8291,7 @@ This has been done for every stock in the sp500 individually to maximixe model p
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [73]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -8303,7 +8310,7 @@ This has been done for every stock in the sp500 individually to maximixe model p
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[73]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8344,20 +8351,20 @@ This has been done for every stock in the sp500 individually to maximixe model p
 <tr>
 <th>mean</th>
 <td>127.500000</td>
-<td>166.480475</td>
-<td>5954.205704</td>
-<td>40.149590</td>
-<td>10577.466477</td>
-<td>5.774665</td>
+<td>165.745353</td>
+<td>5790.800056</td>
+<td>45.765418</td>
+<td>10797.439723</td>
+<td>7.974397</td>
 </tr>
 <tr>
 <th>std</th>
 <td>73.905426</td>
-<td>150.949497</td>
-<td>3974.739860</td>
-<td>50.503618</td>
-<td>1491.357250</td>
-<td>14.913573</td>
+<td>151.348465</td>
+<td>4059.040340</td>
+<td>60.582028</td>
+<td>2350.222048</td>
+<td>23.502220</td>
 </tr>
 <tr>
 <th>min</th>
@@ -8371,38 +8378,38 @@ This has been done for every stock in the sp500 individually to maximixe model p
 <tr>
 <th>25%</th>
 <td>63.750000</td>
-<td>58.499999</td>
-<td>250.600044</td>
+<td>56.735002</td>
+<td>0.000000</td>
 <td>5.000000</td>
-<td>9997.904997</td>
-<td>-0.020950</td>
+<td>9997.917498</td>
+<td>-0.020825</td>
 </tr>
 <tr>
 <th>50%</th>
 <td>127.500000</td>
-<td>118.259998</td>
-<td>7674.640018</td>
-<td>23.000000</td>
-<td>10063.335022</td>
-<td>0.633350</td>
+<td>116.609997</td>
+<td>7416.969948</td>
+<td>24.000000</td>
+<td>10065.889984</td>
+<td>0.658900</td>
 </tr>
 <tr>
 <th>75%</th>
 <td>191.250000</td>
 <td>213.220005</td>
 <td>9517.589996</td>
-<td>53.107928</td>
-<td>10586.399906</td>
-<td>5.863999</td>
+<td>55.000000</td>
+<td>10598.573613</td>
+<td>5.985736</td>
 </tr>
 <tr>
 <th>max</th>
 <td>255.000000</td>
 <td>771.167419</td>
 <td>10000.000000</td>
-<td>251.134021</td>
-<td>18802.475579</td>
-<td>88.024756</td>
+<td>252.179486</td>
+<td>34904.163618</td>
+<td>249.041636</td>
 </tr>
 </tbody>
 </table>
@@ -8455,7 +8462,7 @@ The portfolio maintains an average value of <strong>$~10,577</strong>, with a ty
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [74]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">altair</span> <span class="k">as</span> <span class="nn">alt</span>
@@ -8481,7 +8488,7 @@ The portfolio maintains an average value of <strong>$~10,577</strong>, with a ty
     <span class="p">),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s1">'Stock Name'</span><span class="p">,</span> <span class="s1">'Profit %'</span><span class="p">,</span> <span class="s1">'Portfolio Value'</span><span class="p">]</span>
 <span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s1">'YTD Portfolio Value by Stock'</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s1">'10/19/2023 - 10/24/2024 Portfolio Value by Stock'</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mi">400</span>
 <span class="p">)</span><span class="o">.</span><span class="n">configure_axis</span><span class="p">(</span>
@@ -8500,23 +8507,23 @@ The portfolio maintains an average value of <strong>$~10,577</strong>, with a ty
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
 <style>
-  #altair-viz-261fa04f211541288296c87ed13010bf.vega-embed {
+  #altair-viz-1e5091c9f87f4ce28e928109bc942b19.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-261fa04f211541288296c87ed13010bf.vega-embed details,
-  #altair-viz-261fa04f211541288296c87ed13010bf.vega-embed details summary {
+  #altair-viz-1e5091c9f87f4ce28e928109bc942b19.vega-embed details,
+  #altair-viz-1e5091c9f87f4ce28e928109bc942b19.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-261fa04f211541288296c87ed13010bf"></div>
+<div id="altair-viz-1e5091c9f87f4ce28e928109bc942b19"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-261fa04f211541288296c87ed13010bf") {
-      outputDiv = document.getElementById("altair-viz-261fa04f211541288296c87ed13010bf");
+    if (outputDiv.id !== "altair-viz-1e5091c9f87f4ce28e928109bc942b19") {
+      outputDiv = document.getElementById("altair-viz-1e5091c9f87f4ce28e928109bc942b19");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -8562,7 +8569,7 @@ The portfolio maintains an average value of <strong>$~10,577</strong>, with a ty
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}, "axis": {"labelAngle": 45}}, "data": {"name": "data-14dfaad73f504a98c07e5b3bf839190e"}, "mark": {"type": "bar"}, "encoding": {"color": {"condition": {"test": "(datum['Profit %'] > 0)", "value": "green"}, "value": "red"}, "tooltip": [{"field": "Stock Name", "type": "nominal"}, {"field": "Profit %", "type": "quantitative"}, {"field": "Portfolio Value", "type": "quantitative"}], "x": {"field": "Stock Name", "type": "nominal"}, "y": {"field": "Profit %", "type": "quantitative"}}, "height": 400, "title": "YTD Portfolio Value by Stock", "width": 800, "$schema": "https://vega.github.io/schema/vega-lite/v5.20.1.json", "datasets": {"data-14dfaad73f504a98c07e5b3bf839190e": [{"Stock Name": "AAPL", "Portfolio Value": 12250.267838450183, "Shares Held": 53.10792776410953, "Profit %": 22.50267838450183}, {"Stock Name": "AMZN", "Portfolio Value": 10999.3250958668, "Shares Held": 58.79624392414284, "Profit %": 9.993250958667996}, {"Stock Name": "CCL", "Portfolio Value": 10461.862531661987, "Shares Held": 104.0, "Profit %": 4.618625316619873}, {"Stock Name": "CEG", "Portfolio Value": 17513.065962772846, "Shares Held": 65.85344740166138, "Profit %": 75.13065962772846}, {"Stock Name": "DIS", "Portfolio Value": 9431.860641207708, "Shares Held": 98.78880117253162, "Profit %": -5.681393587922921}, {"Stock Name": "DLTR", "Portfolio Value": 10000.0, "Shares Held": 0.0, "Profit %": 0.0}, {"Stock Name": "HUM", "Portfolio Value": 9737.900024414062, "Shares Held": 2.0, "Profit %": -2.620999755859375}, {"Stock Name": "HWM", "Portfolio Value": 17480.960513930582, "Shares Held": 172.4215628110508, "Profit %": 74.80960513930583}, {"Stock Name": "INTC", "Portfolio Value": 9933.506198883057, "Shares Held": 7.0, "Profit %": -0.6649380111694336}, {"Stock Name": "JNJ", "Portfolio Value": 10961.652867541708, "Shares Held": 67.03965039325733, "Profit %": 9.616528675417085}, {"Stock Name": "KO", "Portfolio Value": 11337.444018213751, "Shares Held": 168.87530583834334, "Profit %": 13.374440182137516}, {"Stock Name": "LULU", "Portfolio Value": 9438.34014892578, "Shares Held": 18.0, "Profit %": -5.616598510742206}, {"Stock Name": "MCD", "Portfolio Value": 10309.240158081057, "Shares Held": 11.0, "Profit %": 3.092401580810565}, {"Stock Name": "META", "Portfolio Value": 17814.98161741119, "Shares Held": 31.390377068650533, "Profit %": 78.1498161741119}, {"Stock Name": "MMM", "Portfolio Value": 11061.189849853516, "Shares Held": 51.0, "Profit %": 10.611898498535156}, {"Stock Name": "MSFT", "Portfolio Value": 10892.311155211968, "Shares Held": 25.63198221513486, "Profit %": 8.92311155211968}, {"Stock Name": "NFLX", "Portfolio Value": 14800.933514605524, "Shares Held": 19.624679494890547, "Profit %": 48.009335146055236}, {"Stock Name": "NKE", "Portfolio Value": 9982.069999694824, "Shares Held": 2.0, "Profit %": -0.1793000030517578}, {"Stock Name": "NVDA", "Portfolio Value": 14751.956703186035, "Shares Held": 92.0, "Profit %": 47.51956703186035}, {"Stock Name": "PFE", "Portfolio Value": 9993.715023040771, "Shares Held": 39.0, "Profit %": -0.06284976959228515}, {"Stock Name": "PG", "Portfolio Value": 10167.875, "Shares Held": 23.0, "Profit %": 1.67875}, {"Stock Name": "T", "Portfolio Value": 11051.795166015623, "Shares Held": 244.0, "Profit %": 10.517951660156232}, {"Stock Name": "TGT", "Portfolio Value": 10075.839828491213, "Shares Held": 40.0, "Profit %": 0.7583982849121276}, {"Stock Name": "TSLA", "Portfolio Value": 11064.091468372948, "Shares Held": 43.067698447790264, "Profit %": 10.64091468372948}, {"Stock Name": "VZ", "Portfolio Value": 10508.703425599328, "Shares Held": 251.13402124600893, "Profit %": 5.0870342559932755}, {"Stock Name": "WBA", "Portfolio Value": 9685.944986343384, "Shares Held": 45.0, "Profit %": -3.140550136566162}, {"Stock Name": "WMT", "Portfolio Value": 11017.83518218994, "Shares Held": 55.0, "Profit %": 10.178351821899396}, {"Stock Name": "XOM", "Portfolio Value": 10300.00333404541, "Shares Held": 34.0, "Profit %": 3.0000333404541015}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}, "axis": {"labelAngle": 45}}, "data": {"name": "data-4ecce5b688deac1e4bc7700a704f3c3a"}, "mark": {"type": "bar"}, "encoding": {"color": {"condition": {"test": "(datum['Profit %'] > 0)", "value": "green"}, "value": "red"}, "tooltip": [{"field": "Stock Name", "type": "nominal"}, {"field": "Profit %", "type": "quantitative"}, {"field": "Portfolio Value", "type": "quantitative"}], "x": {"field": "Stock Name", "type": "nominal"}, "y": {"field": "Profit %", "type": "quantitative"}}, "height": 400, "title": "10/19/2023 - 10/24/2024 Portfolio Value by Stock", "width": 800, "$schema": "https://vega.github.io/schema/vega-lite/v5.20.1.json", "datasets": {"data-4ecce5b688deac1e4bc7700a704f3c3a": [{"Stock Name": "AAPL", "Portfolio Value": 12250.267838450183, "Shares Held": 53.10792776410953, "Profit %": 22.50267838450183}, {"Stock Name": "AMZN", "Portfolio Value": 10999.3250958668, "Shares Held": 58.79624392414284, "Profit %": 9.993250958667996}, {"Stock Name": "CCL", "Portfolio Value": 10461.862531661987, "Shares Held": 104.0, "Profit %": 4.618625316619873}, {"Stock Name": "CEG", "Portfolio Value": 17513.065962772846, "Shares Held": 65.85344740166138, "Profit %": 75.13065962772846}, {"Stock Name": "DIS", "Portfolio Value": 9431.860641207708, "Shares Held": 98.78880117253162, "Profit %": -5.681393587922921}, {"Stock Name": "DLTR", "Portfolio Value": 10000.0, "Shares Held": 0.0, "Profit %": 0.0}, {"Stock Name": "HUM", "Portfolio Value": 9737.900024414062, "Shares Held": 2.0, "Profit %": -2.620999755859375}, {"Stock Name": "HWM", "Portfolio Value": 17480.960513930582, "Shares Held": 172.4215628110508, "Profit %": 74.80960513930583}, {"Stock Name": "INTC", "Portfolio Value": 9933.506198883057, "Shares Held": 7.0, "Profit %": -0.6649380111694336}, {"Stock Name": "JNJ", "Portfolio Value": 10961.652867541708, "Shares Held": 67.03965039325733, "Profit %": 9.616528675417085}, {"Stock Name": "KO", "Portfolio Value": 11337.444018213751, "Shares Held": 168.87530583834334, "Profit %": 13.374440182137516}, {"Stock Name": "LULU", "Portfolio Value": 9438.34014892578, "Shares Held": 18.0, "Profit %": -5.616598510742206}, {"Stock Name": "MCD", "Portfolio Value": 10309.240158081057, "Shares Held": 11.0, "Profit %": 3.092401580810565}, {"Stock Name": "META", "Portfolio Value": 17814.98161741119, "Shares Held": 31.390377068650533, "Profit %": 78.1498161741119}, {"Stock Name": "MMM", "Portfolio Value": 11061.189849853516, "Shares Held": 51.0, "Profit %": 10.611898498535156}, {"Stock Name": "MSFT", "Portfolio Value": 10892.311155211968, "Shares Held": 25.63198221513486, "Profit %": 8.92311155211968}, {"Stock Name": "NFLX", "Portfolio Value": 14800.933514605524, "Shares Held": 19.624679494890547, "Profit %": 48.009335146055236}, {"Stock Name": "NKE", "Portfolio Value": 9982.069999694824, "Shares Held": 2.0, "Profit %": -0.1793000030517578}, {"Stock Name": "PFE", "Portfolio Value": 9993.715023040771, "Shares Held": 39.0, "Profit %": -0.06284976959228515}, {"Stock Name": "PG", "Portfolio Value": 10167.875, "Shares Held": 23.0, "Profit %": 1.67875}, {"Stock Name": "T", "Portfolio Value": 11051.795166015623, "Shares Held": 244.0, "Profit %": 10.517951660156232}, {"Stock Name": "TGT", "Portfolio Value": 10075.839828491213, "Shares Held": 40.0, "Profit %": 0.7583982849121276}, {"Stock Name": "TSLA", "Portfolio Value": 11064.091468372948, "Shares Held": 43.067698447790264, "Profit %": 10.64091468372948}, {"Stock Name": "VST", "Portfolio Value": 31527.478526837112, "Shares Held": 252.1794862692921, "Profit %": 215.27478526837115}, {"Stock Name": "VZ", "Portfolio Value": 10508.703425599328, "Shares Held": 251.13402124600893, "Profit %": 5.0870342559932755}, {"Stock Name": "WBA", "Portfolio Value": 9685.944986343384, "Shares Held": 45.0, "Profit %": -3.140550136566162}, {"Stock Name": "WMT", "Portfolio Value": 11017.83518218994, "Shares Held": 55.0, "Profit %": 10.178351821899396}, {"Stock Name": "XOM", "Portfolio Value": 10300.00333404541, "Shares Held": 34.0, "Profit %": 3.0000333404541015}]}}, {"mode": "vega-lite"});
 </script>
 </div>
 </div>
@@ -8591,7 +8598,7 @@ The portfolio maintains an average value of <strong>$~10,577</strong>, with a ty
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [76]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">final_portfolio_values</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
@@ -8605,7 +8612,7 @@ The portfolio maintains an average value of <strong>$~10,577</strong>, with a ty
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[76]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8639,15 +8646,15 @@ The portfolio maintains an average value of <strong>$~10,577</strong>, with a ty
 </tr>
 <tr>
 <th>mean</th>
-<td>11536.595438</td>
-<td>65.097561</td>
-<td>15.365954</td>
+<td>12135.721217</td>
+<td>70.818257</td>
+<td>21.357212</td>
 </tr>
 <tr>
 <th>std</th>
-<td>2497.985907</td>
-<td>67.545856</td>
-<td>24.979859</td>
+<td>4504.008165</td>
+<td>76.144482</td>
+<td>45.040082</td>
 </tr>
 <tr>
 <th>min</th>
@@ -8670,14 +8677,14 @@ The portfolio maintains an average value of <strong>$~10,577</strong>, with a ty
 <tr>
 <th>75%</th>
 <td>11132.429606</td>
-<td>73.279738</td>
+<td>74.976938</td>
 <td>11.324296</td>
 </tr>
 <tr>
 <th>max</th>
-<td>17814.981617</td>
-<td>251.134021</td>
-<td>78.149816</td>
+<td>31527.478527</td>
+<td>252.179486</td>
+<td>215.274785</td>
 </tr>
 </tbody>
 </table>

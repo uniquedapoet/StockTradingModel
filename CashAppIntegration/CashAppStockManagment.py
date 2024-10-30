@@ -9,16 +9,19 @@ import pandas as pd
 import joblib
 
 
-def simulate_day_for_cash_app(day):
+def simulate_day_for_cash_app():
     portfolio = pd.read_csv("CashAppIntegration/portfolio.csv")
+    daysimulation = pd.DataFrame(columns=['Stock Name','Day','Action','Stock Price','Cash','Shares Held','Portfolio Value','Date'])
     for stock in portfolio['Stock Name'].unique():
         try:
             model = joblib.load(f"models/LGBMmodels/{stock}_model.pkl")
         except FileNotFoundError:
             print(f"Training model for {stock}...")
             model = train_model(stock)
+            joblib.dump(model, f"models/LGBMmodels/{stock}_model.pkl")
         
         stock_data = get_stock_data(stock).tail(1)
+        day = (portfolio[portfolio['Stock Name'] == stock]['Day'].iloc[-1]) + 1
         new_row, _ = stock_market_simulation(
             model,
             initial_cash=portfolio[portfolio['Stock Name'] == stock]['Cash'].iloc[-1],
@@ -28,12 +31,14 @@ def simulate_day_for_cash_app(day):
             oneDay=day,
             descision=portfolio[portfolio['Stock Name'] == stock].tail(1)
         )
-        portfolio = pd.concat([portfolio, new_row])
+        daysimulation = pd.concat([daysimulation, new_row])
     
-    # Save the updated portfolio back to the CSV file
-    portfolio.to_csv("CashAppIntegration/portfolio.csv", index=False)
+    # Save the updated portfolio back to the CSV file  
+    daysimulation['Cash'] = daysimulation['Cash'].sum()      
+    daysimulation.fillna(0, inplace=True)
+    daysimulation.to_csv("CashAppIntegration/portfolio.csv", index=False, mode='a', header=False)
     return portfolio
 
 
 if __name__ == '__main__':
-    simulate_day_for_cash_app(1)
+    simulate_day_for_cash_app()
