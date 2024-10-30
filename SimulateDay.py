@@ -110,14 +110,13 @@ def stock_market_simulation(model,
         columns=['Stock Name', 'Day', 'Action', 'Cash',
                  'Shares Held', 'Portfolio Value', 'Stock Price']) if descision is None else descision)
     days = min(days, len(stock))
-
+    actualSell = None
     # Go through each day and make a decision based on the model
     for i in range(days):
         # Get the stock price, strategy and day for the current day
         stock_price = stock['Close'].iloc[i]
         strategy = predict_action(scaled.iloc[i].to_dict(), model)
         day = oneDay if oneDay else i
-
         if day == 30 and monthly_injection:
             cash += monthly_injection
             invested += monthly_injection
@@ -153,6 +152,7 @@ def stock_market_simulation(model,
         # Sell shares if the strategy is 'Sell' and shares are held
         elif (strategy == 'Sell') and (shares_held > 0) and (modelDecisionDf['Action'].tail(2).eq('Sell').all()):
             # If the last 5 actions were 'Sell', sell 5 shares and mass trade is enabled
+            actualSell = True
             if (modelDecisionDf['Action'].tail(5) == 'Sell').all() and shares_held >= 5 and masstrades:
                 # * 0.99  # Apply a 1% fee, if applicable
                 cash += (stock_price * 5)
@@ -187,7 +187,8 @@ def stock_market_simulation(model,
             'Stock Price': [stock_price],
             'Cash': [cash],
             'Shares Held': [shares_held],
-            'Portfolio Value': [portfolio_value_at_time]
+            'Portfolio Value': [portfolio_value_at_time],
+            'Actual Sell': [actualSell]
         })
         if descision is None:
             modelDecisionDf = pd.concat(

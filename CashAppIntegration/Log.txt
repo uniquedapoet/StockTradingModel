@@ -1,0 +1,4 @@
+APPL, sold at 76.53, fee: 0.02, percentage: 0.02612671456564337AAPL, sold at 76.53, fee: 0.02, percentage: 0.02612671456564337
+AAPL, sold at 76.53, fee: 0.02, percentage: 0.02612671456564337
+AAPL, sold at 76.53, fee: 0.02, percentage: 0.02612671456564337
+AAPL, sold at 76.53, fee: 0.02, percentage: 0.02612671456564337
