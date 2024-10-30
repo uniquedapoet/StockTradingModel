@@ -78,7 +78,9 @@ def stock_market_simulation(model,
                             verbose: bool = False,
                             masstrades: bool = False,
                             monthly_injection: int = 0,
-                            descision: pd.DataFrame = None) -> tuple[pd.DataFrame, int]:
+                            descision: pd.DataFrame = None,
+                            brokeBitch: bool = False,
+                            brokeBitchLimiter: bool = 0.5) -> tuple[pd.DataFrame, int]:
     """
     Simulates the stock market using the given model and stock data.
 
@@ -107,7 +109,6 @@ def stock_market_simulation(model,
     modelDecisionDf = (pd.DataFrame(
         columns=['Stock Name', 'Day', 'Action', 'Cash',
                  'Shares Held', 'Portfolio Value', 'Stock Price']) if descision is None else descision)
-
     days = min(days, len(stock))
 
     # Go through each day and make a decision based on the model
@@ -133,8 +134,9 @@ def stock_market_simulation(model,
                 shares_held += 5
             # Otherwise, buy one share
             else:
-                cash -= stock_price
-                shares_held += 1
+                if brokeBitch:
+                    cash -= stock_price * brokeBitchLimiter
+                    shares_held += brokeBitchLimiter
             if verbose:
                 print(f"Day {day}: Bought 1 share at {
                       stock_price}, Cash left: {cash}")
@@ -149,15 +151,19 @@ def stock_market_simulation(model,
                       stock_price}, Cash left: {cash}")
 
         # Sell shares if the strategy is 'Sell' and shares are held
-        elif strategy == 'Sell' and shares_held > 0 and (modelDecisionDf['Action'].tail(2)).all() == 'Sell':
+        elif (strategy == 'Sell') and (shares_held > 0) and (modelDecisionDf['Action'].tail(2).eq('Sell').all()):
             # If the last 5 actions were 'Sell', sell 5 shares and mass trade is enabled
             if (modelDecisionDf['Action'].tail(5) == 'Sell').all() and shares_held >= 5 and masstrades:
                 # * 0.99  # Apply a 1% fee, if applicable
                 cash += (stock_price * 5)
                 shares_held -= 5
             else:
-                cash += stock_price
-                shares_held -= 1
+                if shares_held < 1:
+                    cash += stock_price * shares_held
+                    shares_held = 0
+                else:
+                    cash += stock_price
+                    shares_held -= 1
             if verbose:
                 print(f"Day {day}: Sold shares at {stock_price}, Cash: {cash}")
 
@@ -951,7 +957,7 @@ def simulate_days(days: int,
                        'INTC', 'T', 'DIS', 'MMM', 'VZ', 'CCL', 'NVDA',
                        'KO', 'JNJ', 'PG', 'WMT', 'MCD', 'PFE', 'AMZN',
                        "WBA", "DLTR", "HUM", "LULU", "NKE", "TGT",
-                       'VST', 'CEG', "HWM"]
+                       'VST', 'CEG', "HWM", "PAYC", "PARA", "EL"]
 
     # Loop through each stock symbol
     for symbol in test_stocks:
@@ -1146,20 +1152,17 @@ def simulate_day_specific(model_type: str = 'LGBM'
 
 
 if __name__ == '__main__':
-    """
-    Split Cash option in simu to 
-    decide if the cash should be split between all stocks or 
-    given to each stock separately.
-    """
-
-
     script_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
     portfolio = pd.read_csv("CashAppIntegration/portfolio.csv")
-    simulate_days(130, to_file=True, massTrade=True, cash=1000,split_cash=True, file_location='simResults/sim_results1.csv',symbols=portfolio['Stock Name'].unique())
-    # simulate_day_specific('XGB')
+    simulate_days(3,
+                  to_file=True,
+                  massTrade=True,
+                  cash=10000,
+                  file_location='simResults/sim_results1.csv',
+                  symbols=['AAPL'])
     # simulate_day_specific('LGBM')
     # train_models()
     # scale_and_obtain_data('AAPL')
