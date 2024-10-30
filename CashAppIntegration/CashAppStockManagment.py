@@ -12,6 +12,7 @@ import joblib
 def simulate_day_for_cash_app():
     portfolio = pd.read_csv("CashAppIntegration/portfolio.csv")
     daysimulation = pd.DataFrame(columns=['Stock Name','Day','Action','Stock Price','Cash','Shares Held','Portfolio Value','Date'])
+    cash = portfolio['Cash'].iloc[-1]
     for stock in portfolio['Stock Name'].unique():
         try:
             model = joblib.load(f"models/LGBMmodels/{stock}_model.pkl")
@@ -20,22 +21,22 @@ def simulate_day_for_cash_app():
             model = train_model(stock)
             joblib.dump(model, f"models/LGBMmodels/{stock}_model.pkl")
         
-        stock_data = get_stock_data(stock)
-        stock_data = stock_data[stock_data['Date'] == pd.to_datetime('10-28-2024')]
+        stock_data = get_stock_data(stock).tail(1)
         day = (portfolio[portfolio['Stock Name'] == stock]['Day'].iloc[-1]) + 1
         new_row, _ = stock_market_simulation(
             model,
-            initial_cash=portfolio[portfolio['Stock Name'] == stock]['Cash'].iloc[-1],
+            initial_cash=cash,
             days=1,
             stock=stock_data,
             existing_shares=portfolio[portfolio['Stock Name'] == stock]['Shares Held'].iloc[-1],
             oneDay=day,
-            descision=portfolio[portfolio['Stock Name'] == stock].tail(1)
+            descision=portfolio[portfolio['Stock Name'] == stock]
         )
+        cash = new_row['Cash'].iloc[-1]
         daysimulation = pd.concat([daysimulation, new_row])
     
     # Save the updated portfolio back to the CSV file  
-    daysimulation['Cash'] = daysimulation['Cash'].sum()      
+    daysimulation['Cash'] = daysimulation['Cash'].iloc[-1]     
     daysimulation.fillna(0, inplace=True)
     daysimulation.to_csv("CashAppIntegration/portfolio.csv", index=False, mode='a', header=False)
     return portfolio
