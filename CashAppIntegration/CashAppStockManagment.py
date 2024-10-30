@@ -20,7 +20,8 @@ def simulate_day_for_cash_app():
             model = train_model(stock)
             joblib.dump(model, f"models/LGBMmodels/{stock}_model.pkl")
         
-        stock_data = get_stock_data(stock).tail(1)
+        stock_data = get_stock_data(stock)
+        stock_data = stock_data[stock_data['Date'] == pd.to_datetime('10-28-2024')]
         day = (portfolio[portfolio['Stock Name'] == stock]['Day'].iloc[-1]) + 1
         new_row, _ = stock_market_simulation(
             model,

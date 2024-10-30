@@ -91,6 +91,8 @@ def stock_market_simulation(model,
     oneDay: If True, only simulate for one day, otherwise pass the day number
     verbose: If True, print the results of the simulation
     masstrades: If True, allow mass trades (buy/sell 5 shares at once)
+    monthly_injection: Amount of cash to inject monthly
+    descision: DataFrame containing the model decisions for each day
 
     Returns:
     modelDecisionDf: DataFrame containing the model decisions for each day
@@ -914,6 +916,7 @@ def train_model_incrementally():
 
 def simulate_days(days: int,
                   cash: int = 10000,
+                  split_cash: bool = False,
                   existing_shares: float = 0,
                   to_file: bool = False,
                   massTrade: bool = False,
@@ -927,8 +930,12 @@ def simulate_days(days: int,
     Parameters:
     days (int): Number of days to simulate
     cash (int): Initial cash amount
+    split_cash (bool): Split the cash after each trade !!! ONLY USE IF SIMULATING ONE DAY AT A TIME !!!
     existing_shares (int): Number of shares already held
     to_file (bool): Save the results to a file
+    massTrade (bool): Simulate mass trading
+    monthly_injection (int): Amount to inject monthly
+    file_location (str): Location to save the file
     massTrade (bool): Simulate mass trading
     """
     # Initialize empty dataframes for storing new decisions
@@ -936,7 +943,8 @@ def simulate_days(days: int,
         'Stock Name', 'Day', 'Action', 'Stock Price', 'Cash', 'Shares Held', 'Portfolio Value'])
     stock_data = pd.read_csv(
         'data/sp500_stocks.csv').sort_values(by=['Symbol', 'Date'])
-    if symbols:
+    cash = cash
+    if symbols is not None:
         test_stocks = symbols
     else:
         test_stocks = ['AAPL', 'MSFT', 'NFLX', 'TSLA', 'XOM', 'META',
@@ -978,8 +986,8 @@ def simulate_days(days: int,
             # Append the new decisions to the all_decisions dataframes
             all_decisions_s = pd.concat(
                 [all_decisions_s, new_decisions_s], ignore_index=True)
-            # if existing_shares == 1:
-            #     continue
+            if split_cash:
+                cash = new_decisions_s['Cash'].iloc[-1]
         except Exception as e:
             print(f"Error: {e}")
             print("====================================")
@@ -1138,11 +1146,19 @@ def simulate_day_specific(model_type: str = 'LGBM'
 
 
 if __name__ == '__main__':
+    """
+    Split Cash option in simu to 
+    decide if the cash should be split between all stocks or 
+    given to each stock separately.
+    """
+
+
     script_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
-    simulate_days(1000, to_file=True, massTrade=True, cash=10000)
+    portfolio = pd.read_csv("CashAppIntegration/portfolio.csv")
+    simulate_days(130, to_file=True, massTrade=True, cash=1000,split_cash=True, file_location='simResults/sim_results1.csv',symbols=portfolio['Stock Name'].unique())
     # simulate_day_specific('XGB')
     # simulate_day_specific('LGBM')
     # train_models()
