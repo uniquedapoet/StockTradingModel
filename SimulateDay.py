@@ -136,6 +136,9 @@ def stock_market_simulation(model,
                 if brokeBitch:
                     cash -= stock_price * brokeBitchLimiter
                     shares_held += brokeBitchLimiter
+                else:
+                    cash -= stock_price
+                    shares_held += 1
             if verbose:
                 print(f"Day {day}: Bought 1 share at {
                       stock_price}, Cash left: {cash}")
@@ -1157,13 +1160,12 @@ if __name__ == '__main__':
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
-    portfolio = pd.read_csv("CashAppIntegration/portfolio.csv")
-    simulate_days(3,
+    simulate_days(1000,
                   to_file=True,
                   massTrade=True,
                   cash=10000,
-                  file_location='simResults/sim_results1.csv',
-                  symbols=['AAPL'])
+                  file_location='simResults/1000_day_test.csv',
+)
     # simulate_day_specific('LGBM')
     # train_models()
     # scale_and_obtain_data('AAPL')

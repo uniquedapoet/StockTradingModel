@@ -1,4 +1,4 @@
-Stock Name,Day,Action,Stock Price,Cash,Shares Held,Portfolio Value,Date
+Stock Name,Day,Action,Stock Price,Cash,Shares Held,Portfolio Value,Date,Actual Sell ?
 AAPL,0,Buy,233.4,0,0.331895123,77.46,2024-10-28
 XOM,0,Buy,118.9,0,0.64250835,76.39,2024-10-28
 AMZN,0,Buy,188.39,0,0.6437942,121.28,2024-10-28
