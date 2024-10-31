@@ -1,12 +1,12 @@
-import joblib
-import pandas as pd
-from SimulateDay import stock_market_simulation, train_model, get_stock_data
 import os
 import sys
 
 # Add the main directory to the Python path
 sys.path.append('/Users/eduardobenjamin/Desktop/Repos/StockTradingModel')
 
+import joblib
+import pandas as pd
+from SimulateDay import stock_market_simulation, train_model, get_stock_data
 
 def simulate_day_for_cash_app():
     """
