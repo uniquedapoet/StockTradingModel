@@ -1199,11 +1199,11 @@ if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
     portfolio = pd.read_csv('CashAppIntegration/portfolio.csv')
-    simulate_days(5,
+    simulate_days(6,
                   to_file=True,
                   massTrade=True,
-                  cash=10000,
-                  file_location='simResults/1_day_test.csv',
+                  cash=390,
+                  file_location='CashAppIntegration/portfolio2.csv',
                   symbols = portfolio['Stock Name'].unique()
 )
     # simulate_day_for_cash_app()
