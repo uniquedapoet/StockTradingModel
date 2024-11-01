@@ -37,7 +37,7 @@ def simulate_day_for_cash_app():
         new_row, _ = stock_market_simulation(
             model=specific_model,
             initial_cash=cash,
-            days=5,  # Simulate only one day
+            days=5,  
             stock=updated_stock_df,
             oneDay=day,
             existing_shares=portfolio[portfolio['Stock Name']
