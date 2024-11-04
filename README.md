@@ -62,4 +62,4 @@ You can explore the project's progress and results by reviewing the notebooks an
 3. Navigate to the Stock_Trading_Model_Report notebook and run to view data collection, model training, and backtesting results.
 
 ## Conclusion
-This project highlights the potential of using machine learning to develop a trading strategy for the stock market. The model showed an average of **12% profit** over a simulated time period, although further improvements could be made with transaction costs, risk management, and additional features.
+This project highlights the potential of using machine learning to develop a trading strategy for the stock market. The model showed an average of **22% profit** over a simulated time period, although further improvements could be made with transaction costs, risk management, and additional features.
