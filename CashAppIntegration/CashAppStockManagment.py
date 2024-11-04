@@ -43,7 +43,9 @@ def simulate_day_for_cash_app():
             existing_shares=portfolio[portfolio['Stock Name']
                                       == stock]['Shares Held'].iloc[-1],
             masstrades=True,
-            descision=portfolio[portfolio['Stock Name'] == stock]
+            descision=portfolio[portfolio['Stock Name'] == stock],
+            brokeBitch=True,
+            brokeBitchLimiter=0.2,
         )
         cash += new_row['Cash'].iloc[-1]
         daysimulation = pd.concat([daysimulation, new_row])
