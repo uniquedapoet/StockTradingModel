@@ -1,9 +1,3 @@
-To help you alter your README, here's a general structure that shifts the focus from treating the repository as a module to a showcase of your stock trading model project. This version emphasizes the work you did, the methods used, and the results achieved, instead of positioning it as something that other people can directly use.
-
-### Here's an updated README structure for a project-focused repository:
-
----
-
 # Stock Trading Model Using Machine Learning
 
 ## Project Overview
