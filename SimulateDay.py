@@ -980,7 +980,7 @@ def simulate_days(days: int,
             except Exception:
                 print(f"Model for {symbol} not found. Training a new model...")
                 specific_model = train_model(symbol)
-                print(f"Model trained for {symbol}")
+                specific_model = joblib.load(f'models/LGBMmodels/{symbol}_model.pkl')
 
             # Simulate a day of trading for the stock with the specific model
             new_decisions_s, _ = stock_market_simulation(
@@ -1157,7 +1157,8 @@ def simulate_day_specific(model_type: str = 'LGBM'
 
 def simulate_day_for_cash_app():
     portfolio = pd.read_csv("CashAppIntegration/portfolio.csv")
-    daysimulation = pd.DataFrame(columns=['Stock Name','Day','Action','Stock Price','Cash','Shares Held','Portfolio Value','Date'])
+    daysimulation = pd.DataFrame(columns=[
+                                 'Stock Name', 'Day', 'Action', 'Stock Price', 'Cash', 'Shares Held', 'Portfolio Value', 'Date'])
     cash = portfolio['Cash'].iloc[-1]
     for stock in portfolio['Stock Name'].unique():
         try:
@@ -1166,7 +1167,7 @@ def simulate_day_for_cash_app():
             print(f"Training model for {stock}...")
             model = train_model(stock)
             joblib.dump(model, f"models/LGBMmodels/{stock}_model.pkl")
-        
+
         updated_stock_df = get_stock_data(stock)
         updated_stock_df = updated_stock_df.tail(1)
 
@@ -1177,20 +1178,20 @@ def simulate_day_for_cash_app():
             initial_cash=cash,
             days=1,
             stock=updated_stock_df,
-            existing_shares=portfolio[portfolio['Stock Name'] == stock]['Shares Held'].iloc[-1],
+            existing_shares=portfolio[portfolio['Stock Name']
+                                      == stock]['Shares Held'].iloc[-1],
             oneDay=day,
             descision=portfolio[portfolio['Stock Name'] == stock]
         )
         cash = new_row['Cash'].iloc[-1]
         daysimulation = pd.concat([daysimulation, new_row])
-    
-    # Save the updated portfolio back to the CSV file  
-    daysimulation['Cash'] = daysimulation['Cash'].iloc[-1]     
+
+    # Save the updated portfolio back to the CSV file
+    daysimulation['Cash'] = daysimulation['Cash'].iloc[-1]
     daysimulation.fillna(0, inplace=True)
-    daysimulation.to_csv("CashAppIntegration/portfolio.csv", index=False, mode='a', header=False)
+    daysimulation.to_csv("CashAppIntegration/portfolio.csv",
+                         index=False, mode='a', header=False)
     return portfolio
-
-
 
 
 if __name__ == '__main__':
@@ -1199,13 +1200,13 @@ if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
     portfolio = pd.read_csv('CashAppIntegration/portfolio.csv')
-    simulate_days(6,
+    simulate_days(days=256,
                   to_file=True,
                   massTrade=True,
-                  cash=390,
+                  cash=10000,
                   file_location='CashAppIntegration/portfolio2.csv',
-                  symbols = portfolio['Stock Name'].unique()
-)
+                  symbols=['ASTS','GSAT']
+                  )
     # simulate_day_for_cash_app()
     # simulate_day_specific('LGBM')
     # train_models()
