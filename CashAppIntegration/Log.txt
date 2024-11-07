@@ -6,3 +6,4 @@ AMZN, sold at 124.11, fee: 0.02, percentage: 0.016112140497865142
 AMZN, sold at 124.11, fee: 0.02, percentage: 0.016112140497865142
 AMZN, sold at 124.11, fee: 0.02, percentage: 0.016112140497865142
 AMZN, sold at 124.11, fee: 0.02, percentage: 0.016112140497865142
+AMZN, sold at 124.11, fee: 0.02, percentage: 0.016112140497865142
