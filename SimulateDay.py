@@ -34,17 +34,25 @@ def predict_action(data: dict,
     model (xgb.Booster): XGBoost model used for prediction
     """
     features = ['Volume', 'MA_10', 'MA_20', 'MA_50', 'MA_200', 'std_10',
-                'std_20', 'std_50', 'std_200', 'upper_band_10', 'lower_band_10',
-                'upper_band_20', 'lower_band_20', 'upper_band_50', 'lower_band_50',
-                'upper_band_200', 'lower_band_200', 'Golden_Cross_Short', 'Golden_Cross_Medium',
-                'Golden_Cross_Long', 'Death_Cross_Short', 'Death_Cross_Medium', 'Death_Cross_Long',
-                'ROC', 'AVG_Volume_10', 'AVG_Volume_20', 'AVG_Volume_50', 'AVG_Volume_200', 'Doji',
-                'Bullish_Engulfing', 'Bearish_Engulfing', 'MACD', 'Signal', 'MACD_Hist', 'TR', 'ATR',
-                'RSI_10_Day', '10_Day_ROC', 'Resistance_10_Day', 'Support_10_Day', 'Resistance_20_Day',
-                'Support_20_Day', 'Resistance_50_Day', 'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
+                'std_20', 'std_50', 'std_200',
+                'upper_band_10', 'lower_band_10',
+                'upper_band_20', 'lower_band_20',
+                'upper_band_50', 'lower_band_50',
+                'upper_band_200', 'lower_band_200',
+                'Golden_Cross_Short', 'Golden_Cross_Medium',
+                'Golden_Cross_Long', 'Death_Cross_Short',
+                'Death_Cross_Medium', 'Death_Cross_Long',
+                'ROC', 'AVG_Volume_10', 'AVG_Volume_20',
+                'AVG_Volume_50', 'AVG_Volume_200', 'Doji',
+                'Bullish_Engulfing', 'Bearish_Engulfing',
+                'MACD', 'Signal', 'MACD_Hist', 'TR', 'ATR',
+                'RSI_10_Day', '10_Day_ROC', 'Resistance_10_Day',
+                'Support_10_Day', 'Resistance_20_Day',
+                'Support_20_Day', 'Resistance_50_Day',
+                'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
                 'Volume_MA_50', 'OBV', 'Z-score']
 
-    if type(model) == xgb.core.Booster:
+    if isinstance(model, xgb.core.Booster):
 
         data_df = pd.DataFrame([data])
 
@@ -80,7 +88,8 @@ def stock_market_simulation(model,
                             monthly_injection: int = 0,
                             descision: pd.DataFrame = None,
                             brokeBitch: bool = False,
-                            brokeBitchLimiter: bool = 0.5) -> tuple[pd.DataFrame, int]:
+                            brokeBitchLimiter: bool = 0.5
+                            ) -> tuple[pd.DataFrame, int]:
     """
     Simulates the stock market using the given model and stock data.
 
@@ -108,7 +117,8 @@ def stock_market_simulation(model,
     scaled = scale_data(stock)
     modelDecisionDf = (pd.DataFrame(
         columns=['Stock Name', 'Day', 'Action', 'Cash',
-                 'Shares Held', 'Portfolio Value', 'Stock Price']) if descision is None else descision)
+                 'Shares Held', 'Portfolio Value', 'Stock Price']
+    ) if descision is None else descision)
     days = min(days, len(stock))
     actualSell = None
 
@@ -125,7 +135,9 @@ def stock_market_simulation(model,
                 print(f"Day {day}: Monthly injection of {monthly_injection}")
         # Buy shares if the strategy is 'Buy' and cash is sufficient
         if strategy == 'Buy' and cash >= stock_price:
-            # If the last 5 actions were 'Buy', buy 5 shares and mass trade is enabled
+
+            # If the last 5 actions were 'Buy',
+            # buy 5 shares and mass trade is enabled
             if (len(modelDecisionDf) >= 5 and
                     (modelDecisionDf['Action'].tail(5) == 'Buy').all()
                     and cash >= stock_price * 5 and masstrades):
@@ -154,10 +166,14 @@ def stock_market_simulation(model,
                       stock_price}, Cash left: {cash}")
 
         # Sell shares if the strategy is 'Sell' and shares are held
-        elif (strategy == 'Sell') and (shares_held > 0) and (modelDecisionDf['Action'].tail(2).eq('Sell').all()) and len(modelDecisionDf) > 1:
-            # If the last 5 actions were 'Sell', sell 5 shares and mass trade is enabled
+        elif ((strategy == 'Sell') and (shares_held > 0)
+              ) and (modelDecisionDf['Action'].tail(2).eq('Sell').all()
+                     ) and len(modelDecisionDf) > 1:
+            # If the last 5 actions were 'Sell',
+            # sell 5 shares and mass trade is enabled
             actualSell = True
-            if (modelDecisionDf['Action'].tail(5) == 'Sell').all() and shares_held >= 5 and masstrades:
+            if (modelDecisionDf['Action'].tail(5) == 'Sell').all(
+            ) and shares_held >= 5 and masstrades:
                 # * 0.99  # Apply a 1% fee, if applicable
                 cash += (stock_price * 5)
                 shares_held -= 5
@@ -174,8 +190,7 @@ def stock_market_simulation(model,
         # Hold the current position if the strategy is 'Hold'
         elif strategy == 'Hold':
             if verbose:
-                print(f"Day {day}: Holding, Cash: {
-                      cash}, Shares held: {shares_held}")
+                print(f"Day {day}: Holding, Cash: {cash}, Shares held: {shares_held}")
 
         # Calculate the total portfolio value (cash + stock holdings)
         portfolio_value_at_time = cash + (shares_held * stock_price)
@@ -980,7 +995,8 @@ def simulate_days(days: int,
             except Exception:
                 print(f"Model for {symbol} not found. Training a new model...")
                 specific_model = train_model(symbol)
-                specific_model = joblib.load(f'models/LGBMmodels/{symbol}_model.pkl')
+                specific_model = joblib.load(
+                    f'models/LGBMmodels/{symbol}_model.pkl')
 
             # Simulate a day of trading for the stock with the specific model
             new_decisions_s, _ = stock_market_simulation(
@@ -1205,7 +1221,7 @@ if __name__ == '__main__':
                   massTrade=True,
                   cash=10000,
                   file_location='CashAppIntegration/portfolio2.csv',
-                  symbols=['ASTS','GSAT']
+                  symbols=['DJT', 'GSAT']
                   )
     # simulate_day_for_cash_app()
     # simulate_day_specific('LGBM')
