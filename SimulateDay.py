@@ -738,7 +738,6 @@ def get_stock_data(symbol: str
             data = stock.history(period='1d', interval='1d')
         except:
             stock = yf.Ticker(symbol)
-
             data = stock.history(period='1d', interval='1d')
 
         if not data.empty:
@@ -1221,8 +1220,7 @@ if __name__ == '__main__':
                   massTrade=True,
                   cash=10000,
                   file_location='CashAppIntegration/portfolio2.csv',
-                  symbols=['DJT', 'GSAT']
-                  )
+                  symbols=portfolio['Stock Name'].unique())
     # simulate_day_for_cash_app()
     # simulate_day_specific('LGBM')
     # train_models()

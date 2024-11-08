@@ -1,6 +1,23 @@
 import joblib
+import yfinance as yf
 import pandas as pd
-from SimulateDay import stock_market_simulation, train_model, get_stock_data
+from SimulateDay import stock_market_simulation, train_model
+
+
+def get_stock_data(symbol: str
+                   ) -> pd.DataFrame:
+    """
+    Gets the stock data for a given symbol and adds new columns to the DataFrame.
+
+    Parameters:
+    symbol (str): Stock symbol to get data for
+    """
+    stock = yf.Ticker(symbol)
+    stock_df = stock.history(period='5d', interval='1d')
+    stock_df['Symbol'] = symbol
+    stock_df.reset_index(inplace=True)
+    
+    return stock_df
 
 
 def simulate_day_for_cash_app():
