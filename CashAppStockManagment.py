@@ -33,7 +33,7 @@ def simulate_day_for_cash_app():
         updated_stock_df = get_stock_data(stock).drop_duplicates()
         updated_stock_df = updated_stock_df.reset_index(drop=True)
         updated_stock_df = updated_stock_df.tail(5)
-        
+        # updated_stock_df = updated_stock_df.head(4)
 
         day = (portfolio[portfolio['Stock Name'] == stock]['Day'].iloc[-1]) + 1
 
