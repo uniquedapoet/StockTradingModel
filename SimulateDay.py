@@ -84,11 +84,12 @@ def stock_market_simulation(model,
                             existing_shares: int = 0,
                             oneDay=None,
                             verbose: bool = False,
-                            masstrades: bool = False,
+                            mass_buy: bool = False,
                             monthly_injection: int = 0,
                             descision: pd.DataFrame = None,
                             brokeBitch: bool = False,
-                            brokeBitchLimiter: bool = 0.5
+                            brokeBitchLimiter: bool = 0.5,
+                            mass_sell: bool = False
                             ) -> tuple[pd.DataFrame, int]:
     """
     Simulates the stock market using the given model and stock data.
@@ -101,7 +102,8 @@ def stock_market_simulation(model,
     existing_shares: Number of shares already held
     oneDay: If True, only simulate for one day, otherwise pass the day number
     verbose: If True, print the results of the simulation
-    masstrades: If True, allow mass trades (buy/sell 5 shares at once)
+    mass_buy: If True, allow mass trades (buy 5 shares at once)
+    mass_sell: If True, allow mass trades (sell 5 shares at once)
     monthly_injection: Amount of cash to inject monthly
     descision: DataFrame containing the model decisions for each day
 
@@ -140,7 +142,7 @@ def stock_market_simulation(model,
             # buy 5 shares and mass trade is enabled
             if (len(modelDecisionDf) >= 5 and
                     (modelDecisionDf['Action'].tail(5) == 'Buy').all()
-                    and cash >= stock_price * 5 and masstrades):
+                    and cash >= stock_price * 5 and mass_buy):
                 # * 0.99  # Apply a 1% fee, if applicable
                 cash -= (stock_price * 5)
                 shares_held += 5
@@ -171,12 +173,9 @@ def stock_market_simulation(model,
                      ) and len(modelDecisionDf) > 1:
             # If the last 5 actions were 'Sell',
             # sell 5 shares and mass trade is enabled
-            actualSell = True
-            if (modelDecisionDf['Action'].tail(5) == 'Sell').all(
-            ) and shares_held >= 5 and masstrades:
-                # * 0.99  # Apply a 1% fee, if applicable
-                cash += (stock_price * 5)
-                shares_held -= 5
+            if mass_sell:
+                cash += shares_held * stock_price
+                shares_held = 0
             else:
                 if shares_held < 1:
                     cash += stock_price * shares_held
@@ -190,7 +189,8 @@ def stock_market_simulation(model,
         # Hold the current position if the strategy is 'Hold'
         elif strategy == 'Hold':
             if verbose:
-                print(f"Day {day}: Holding, Cash: {cash}, Shares held: {shares_held}")
+                print(f"Day {day}: Holding, Cash: {
+                      cash}, Shares held: {shares_held}")
 
         # Calculate the total portfolio value (cash + stock holdings)
         portfolio_value_at_time = cash + (shares_held * stock_price)
@@ -657,14 +657,16 @@ def preprocess_data(stock_df: pd.DataFrame,
     return X_train, X_test, y_train, y_test
 
 
-def _select_stock():
+def select_stock():
     """
     Selects a stock from the S&P 500 dataset.
     """
-    stock_df = pd.read_csv(
-        'data/sp500_stocks.csv').sort_values(by=['Symbol', 'Date'])
     company_name = input('Enter the name of the company: ')
-    return stock_df[stock_df['Symbol'] == company_name]
+    stock = yf.Ticker(company_name)
+    data = stock.history(period='max', interval='1d')
+    data['Symbol'] = company_name
+    data = add_columns(data)
+    return data
 
 
 def fixFuckUp(symbol: str
@@ -728,54 +730,11 @@ def get_stock_data(symbol: str
     Parameters:
     symbol (str): Stock symbol to get data for
     """
-    start_date = '2010-01-01'
-    stock_df = yf.download(symbol, start=start_date)
+    stock = yf.Ticker(symbol)
+    stock_df = stock.history(period='max', interval='1d')
     stock_df['Symbol'] = symbol
     stock_df.reset_index(inplace=True)
-    if (stock_df['Date'].tail(1).values != datetime.datetime.now().strftime('%Y-%m-%d')):
-        try:
-            stock = yf.Ticker(symbol)
-            data = stock.history(period='1d', interval='1d')
-        except:
-            stock = yf.Ticker(symbol)
-            data = stock.history(period='1d', interval='1d')
-
-        if not data.empty:
-            latest_data = data.iloc[-1]
-            time = latest_data.name
-            open_price = latest_data['Open']
-            high = latest_data['High']
-            low = latest_data['Low']
-            close = latest_data['Close']
-            volume = latest_data['Volume']
-            new_row = pd.DataFrame({
-                'Symbol': [symbol],
-                'Date': [datetime.datetime.strftime(time, '%Y-%m-%d')],
-                'Open': [open_price],
-                'High': [high],
-                'Low': [low],
-                'Close': [close],
-                'Volume': [volume]
-            })
-
-            new_row = new_row.reset_index(drop=True)
-
-            stock_df = pd.concat([stock_df, new_row],
-                                 ignore_index=True).fillna(0)
-            # Check if the last two dates in stock_df are the same as the date in new_row
-            row = pd.DataFrame({
-                'Date': [datetime.datetime.strftime(time, '%Y-%m-%d')],
-                'Symbol': [symbol],
-                'Adj Close': [close],
-                'Close': [close],
-                'High': [high],
-                'Low': [low],
-                'Open': [open_price],
-                'Volume': [volume]
-            })
-            row.to_csv('data/sp500_stocks.csv',
-                       index=False, mode='a', header=False)
-    stock_df['Date'] = pd.to_datetime(stock_df["Date"])
+    
     return stock_df
 
 
@@ -945,7 +904,7 @@ def simulate_days(days: int,
                   split_cash: bool = False,
                   existing_shares: float = 0,
                   to_file: bool = False,
-                  massTrade: bool = False,
+                  massTrade: tuple = (False, False),
                   monthly_injection: int = 0,
                   file_location: str = None,
                   symbols: list = None) -> pd.DataFrame:
@@ -967,8 +926,7 @@ def simulate_days(days: int,
     # Initialize empty dataframes for storing new decisions
     all_decisions_s = pd.DataFrame(columns=[
         'Stock Name', 'Day', 'Action', 'Stock Price', 'Cash', 'Shares Held', 'Portfolio Value'])
-    stock_data = pd.read_csv(
-        'data/sp500_stocks.csv').sort_values(by=['Symbol', 'Date'])
+    
     cash = cash
     if symbols is not None:
         test_stocks = symbols
@@ -984,7 +942,8 @@ def simulate_days(days: int,
         try:
             # Get the most recent stock_data
             updated_stock_df = get_stock_data(symbol)
-            updated_stock_df = updated_stock_df.tail(days)
+            updated_stock_df = updated_stock_df.tail(days+10)
+            updated_stock_df = updated_stock_df.head(days)
 
             # Load the specific model for the stock, or fallback to the general model if it doesn't exist
             try:
@@ -1005,7 +964,8 @@ def simulate_days(days: int,
                 stock=updated_stock_df,
                 oneDay=False,
                 existing_shares=existing_shares,
-                masstrades=massTrade,
+                mass_buy=massTrade[0],
+                mass_sell=massTrade[1],
                 monthly_injection=monthly_injection
             )
             # Append the new decisions to the all_decisions dataframes
@@ -1027,6 +987,22 @@ def simulate_days(days: int,
             all_decisions_s.to_csv('simResults/sim_results.csv',
                                    index=False)
     return all_decisions_s
+
+
+def find_compound_interest_rate(principal, future_value, times_compounded, years):
+    """
+    Find the annual compound interest rate.
+
+    Parameters:
+        principal (float): Initial amount of money.
+        future_value (float): Future value including compound interest.
+        times_compounded (int): Number of times interest is compounded per year.
+        years (float): Total number of years.
+
+    Returns:
+        float: Annual interest rate as a decimal (e.g., 0.05 for 5%).
+    """
+    return (future_value / principal) ** (1 / (times_compounded * years)) - 1
 
 
 def simulate_day_general(
@@ -1215,12 +1191,12 @@ if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
     portfolio = pd.read_csv('CashAppIntegration/portfolio.csv')
-    simulate_days(days=256,
+    simulate_days(days=2560,
                   to_file=True,
-                  massTrade=True,
+                  massTrade=(True,True),
                   cash=10000,
-                  file_location='CashAppIntegration/portfolio2.csv',
-                  symbols=portfolio['Stock Name'].unique())
+                  file_location='simResults/10year_mass_sell.csv',
+                  )
     # simulate_day_for_cash_app()
     # simulate_day_specific('LGBM')
     # train_models()

@@ -33,6 +33,7 @@ def simulate_day_for_cash_app():
         updated_stock_df = get_stock_data(stock).drop_duplicates()
         updated_stock_df = updated_stock_df.reset_index(drop=True)
         updated_stock_df = updated_stock_df.tail(5)
+        
 
         day = (portfolio[portfolio['Stock Name'] == stock]['Day'].iloc[-1]) + 1
 
@@ -54,7 +55,7 @@ def simulate_day_for_cash_app():
             oneDay=day,
             existing_shares=portfolio[portfolio['Stock Name']
                                       == stock]['Shares Held'].iloc[-1],
-            masstrades=True,
+            mass_buy=True,
             descision=portfolio[portfolio['Stock Name'] == stock],
             brokeBitch=True,
             brokeBitchLimiter=0.2,
