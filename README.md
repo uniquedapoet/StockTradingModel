@@ -1,9 +1,3 @@
-To help you alter your README, here's a general structure that shifts the focus from treating the repository as a module to a showcase of your stock trading model project. This version emphasizes the work you did, the methods used, and the results achieved, instead of positioning it as something that other people can directly use.
-
-### Here's an updated README structure for a project-focused repository:
-
----
-
 # Stock Trading Model Using Machine Learning
 
 ## Project Overview
@@ -62,4 +56,4 @@ You can explore the project's progress and results by reviewing the notebooks an
 3. Navigate to the Stock_Trading_Model_Report notebook and run to view data collection, model training, and backtesting results.
 
 ## Conclusion
-This project highlights the potential of using machine learning to develop a trading strategy for the stock market. The model showed an average of **12% profit** over a simulated time period, although further improvements could be made with transaction costs, risk management, and additional features.
+This project highlights the potential of using machine learning to develop a trading strategy for the stock market. The model showed an average of **22% profit** over a simulated time period, although further improvements could be made with transaction costs, risk management, and additional features.

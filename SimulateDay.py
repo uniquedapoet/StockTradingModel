@@ -74,10 +74,13 @@ def stock_market_simulation(model,
                             days: int,
                             stock: pd.DataFrame,
                             existing_shares: int = 0,
-                            oneDay=False,
+                            oneDay=None,
                             verbose: bool = False,
                             masstrades: bool = False,
-                            monthly_injection: int = 0) -> tuple[pd.DataFrame, int]:
+                            monthly_injection: int = 0,
+                            descision: pd.DataFrame = None,
+                            brokeBitch: bool = False,
+                            brokeBitchLimiter: bool = 0.5) -> tuple[pd.DataFrame, int]:
     """
     Simulates the stock market using the given model and stock data.
 
@@ -90,6 +93,8 @@ def stock_market_simulation(model,
     oneDay: If True, only simulate for one day, otherwise pass the day number
     verbose: If True, print the results of the simulation
     masstrades: If True, allow mass trades (buy/sell 5 shares at once)
+    monthly_injection: Amount of cash to inject monthly
+    descision: DataFrame containing the model decisions for each day
 
     Returns:
     modelDecisionDf: DataFrame containing the model decisions for each day
@@ -101,11 +106,11 @@ def stock_market_simulation(model,
     shares_held = existing_shares
     portfolio_value = []
     scaled = scale_data(stock)
-    modelDecisionDf = pd.DataFrame(
+    modelDecisionDf = (pd.DataFrame(
         columns=['Stock Name', 'Day', 'Action', 'Cash',
-                 'Shares Held', 'Portfolio Value', 'Stock Price'])
-
+                 'Shares Held', 'Portfolio Value', 'Stock Price']) if descision is None else descision)
     days = min(days, len(stock))
+    actualSell = None
 
     # Go through each day and make a decision based on the model
     for i in range(days):
@@ -113,7 +118,6 @@ def stock_market_simulation(model,
         stock_price = stock['Close'].iloc[i]
         strategy = predict_action(scaled.iloc[i].to_dict(), model)
         day = oneDay if oneDay else i
-
         if day == 30 and monthly_injection:
             cash += monthly_injection
             invested += monthly_injection
@@ -130,8 +134,12 @@ def stock_market_simulation(model,
                 shares_held += 5
             # Otherwise, buy one share
             else:
-                cash -= stock_price
-                shares_held += 1
+                if brokeBitch:
+                    cash -= stock_price * brokeBitchLimiter
+                    shares_held += brokeBitchLimiter
+                else:
+                    cash -= stock_price
+                    shares_held += 1
             if verbose:
                 print(f"Day {day}: Bought 1 share at {
                       stock_price}, Cash left: {cash}")
@@ -146,15 +154,20 @@ def stock_market_simulation(model,
                       stock_price}, Cash left: {cash}")
 
         # Sell shares if the strategy is 'Sell' and shares are held
-        elif strategy == 'Sell' and shares_held > 0 and (modelDecisionDf['Action'].tail(2)).all() == 'Sell':
+        elif (strategy == 'Sell') and (shares_held > 0) and (modelDecisionDf['Action'].tail(2).eq('Sell').all()) and len(modelDecisionDf) > 1:
             # If the last 5 actions were 'Sell', sell 5 shares and mass trade is enabled
+            actualSell = True
             if (modelDecisionDf['Action'].tail(5) == 'Sell').all() and shares_held >= 5 and masstrades:
                 # * 0.99  # Apply a 1% fee, if applicable
                 cash += (stock_price * 5)
                 shares_held -= 5
             else:
-                cash += stock_price
-                shares_held -= 1
+                if shares_held < 1:
+                    cash += stock_price * shares_held
+                    shares_held = 0
+                else:
+                    cash += stock_price
+                    shares_held -= 1
             if verbose:
                 print(f"Day {day}: Sold shares at {stock_price}, Cash: {cash}")
 
@@ -178,11 +191,14 @@ def stock_market_simulation(model,
             'Stock Price': [stock_price],
             'Cash': [cash],
             'Shares Held': [shares_held],
-            'Portfolio Value': [portfolio_value_at_time]
+            'Portfolio Value': [portfolio_value_at_time],
+            'Actual Sell': [actualSell]
         })
-        modelDecisionDf = pd.concat(
-            [modelDecisionDf, new_row], ignore_index=True)
-
+        if descision is None:
+            modelDecisionDf = pd.concat(
+                [modelDecisionDf, new_row], ignore_index=True)
+        else:
+            modelDecisionDf = new_row
     # Final results
     final_portfolio_value = cash + (shares_held * stock['Close'].iloc[-1])
     if verbose:
@@ -324,8 +340,9 @@ def add_columns(stock_df: pd.DataFrame
     stock_df['volume_lag5'] = stock_df['Volume'].shift(10)
 
     # Create new columns with Moving Averages and Standard Deviations
+    stock_df.reset_index(inplace=True)
     stock_df['Date'] = pd.to_datetime(stock_df['Date'])
-
+    # stock_df['Symbol'] = stock_df['St']
     stock_df['MA_10'] = stock_df.groupby('Symbol')['Close'].rolling(
         window=10).mean().reset_index(level=0, drop=True)
     stock_df['MA_20'] = stock_df.groupby('Symbol')['Close'].rolling(
@@ -562,7 +579,9 @@ def scale_and_obtain_data(symbol: str,
                 'Support_20_Day', 'Resistance_50_Day', 'Support_50_Day', 'Volume_MA_10', 'Volume_MA_20',
                 'Volume_MA_50', 'OBV', 'Z-score']
 
-    stock_df = get_stock_data(symbol).tail(length)
+    start_date = '2010-01-01'
+    stock_df = yf.download(symbol, start=start_date)
+    stock_df['Symbol'] = symbol
 
     # stock_df = pd.read_csv('data/sp500_stocks.csv').sort_values(by=['Symbol','Date'])
     # stock_df = stock_df[stock_df['Symbol'] == symbol]
@@ -694,9 +713,10 @@ def get_stock_data(symbol: str
     Parameters:
     symbol (str): Stock symbol to get data for
     """
-    stock_df = pd.read_csv(
-        'data/sp500_stocks.csv').sort_values(by=['Symbol', 'Date'])
-    stock_df = stock_df[stock_df['Symbol'] == symbol]
+    start_date = '2010-01-01'
+    stock_df = yf.download(symbol, start=start_date)
+    stock_df['Symbol'] = symbol
+    stock_df.reset_index(inplace=True)
     if (stock_df['Date'].tail(1).values != datetime.datetime.now().strftime('%Y-%m-%d')):
         try:
             stock = yf.Ticker(symbol)
@@ -741,6 +761,7 @@ def get_stock_data(symbol: str
             })
             row.to_csv('data/sp500_stocks.csv',
                        index=False, mode='a', header=False)
+    stock_df['Date'] = pd.to_datetime(stock_df["Date"])
     return stock_df
 
 
@@ -792,6 +813,34 @@ def train_models():
             # Save the model
             joblib.dump(model, f'models/LGBMmodels/{stock}_model.pkl')
             logging.info(f"Model for {stock} saved successfully")
+
+
+def train_model(stock: str):
+    # Obtain and scale data for the stock
+    X_train, _, y_train, _ = scale_and_obtain_data(stock)
+    print(f"Training model for {stock}")
+
+    # Hyperparameter tuning (optional)
+    logging.info(f"Tuning hyperparameters for {stock}...")
+    best_params = tune_hyperparameters(X_train, y_train)
+    logging.info(f"Best parameters for {stock}: {best_params}")
+
+    # Define and fit the model
+    model = LGBMClassifier(random_state=42, **best_params)
+    model.fit(X_train, y_train)
+
+    # Cross-validation for better evaluation
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_scores = cross_val_score(
+        model, X_train, y_train, cv=skf, scoring='accuracy')
+    logging.info(
+        f"Cross-validation accuracy for {stock}: {cv_scores.mean():.4f}")
+
+    # Save the model
+    joblib.dump(model, f'models/LGBMmodels/{stock}_model.pkl')
+    logging.info(f"Model for {stock} saved successfully")
+
+    return joblib.load(f'models/LGBMmodels/{stock}_model.pkl')
 
 
 def train_model_incrementally():
@@ -879,10 +928,13 @@ def train_model_incrementally():
 
 def simulate_days(days: int,
                   cash: int = 10000,
+                  split_cash: bool = False,
                   existing_shares: float = 0,
                   to_file: bool = False,
                   massTrade: bool = False,
-                  monthly_injection: int = 0) -> pd.DataFrame:
+                  monthly_injection: int = 0,
+                  file_location: str = None,
+                  symbols: list = None) -> pd.DataFrame:
     """
     Simulates a number of days of trading for all stocks using the specific model.
     Models used: {symbol}_model.pkl LGBMClassifier
@@ -890,8 +942,12 @@ def simulate_days(days: int,
     Parameters:
     days (int): Number of days to simulate
     cash (int): Initial cash amount
+    split_cash (bool): Split the cash after each trade !!! ONLY USE IF SIMULATING ONE DAY AT A TIME !!!
     existing_shares (int): Number of shares already held
     to_file (bool): Save the results to a file
+    massTrade (bool): Simulate mass trading
+    monthly_injection (int): Amount to inject monthly
+    file_location (str): Location to save the file
     massTrade (bool): Simulate mass trading
     """
     # Initialize empty dataframes for storing new decisions
@@ -899,19 +955,22 @@ def simulate_days(days: int,
         'Stock Name', 'Day', 'Action', 'Stock Price', 'Cash', 'Shares Held', 'Portfolio Value'])
     stock_data = pd.read_csv(
         'data/sp500_stocks.csv').sort_values(by=['Symbol', 'Date'])
-    sp500_stocks = ['AAPL', 'MSFT', 'NFLX', 'TSLA', 'XOM', 'META',
-                    'INTC', 'T', 'DIS', 'MMM', 'VZ', 'CCL', 'NVDA',
-                    'KO', 'JNJ', 'PG', 'WMT', 'MCD', 'PFE','AMZN',
-                    "WBA", "DLTR", "HUM", "LULU", "NKE", "TGT",
-                    'VST','CEG',"HWM"]
+    cash = cash
+    if symbols is not None:
+        test_stocks = symbols
+    else:
+        test_stocks = ['AAPL', 'MSFT', 'NFLX', 'TSLA', 'XOM', 'META',
+                       'INTC', 'T', 'DIS', 'MMM', 'VZ', 'CCL', 'NVDA',
+                       'KO', 'JNJ', 'PG', 'WMT', 'MCD', 'PFE', 'AMZN',
+                       "WBA", "DLTR", "HUM", "LULU", "NKE", "TGT",
+                       'VST', 'CEG', "HWM", "PAYC", "PARA", "EL"]
+
     # Loop through each stock symbol
-    for symbol in sp500_stocks:
+    for symbol in test_stocks:
         try:
             # Get the most recent stock_data
             updated_stock_df = get_stock_data(symbol)
             updated_stock_df = updated_stock_df.tail(days)
-
-            # updated_stock_df = stock_data[stock_data['Symbol'] == symbol].tail(1)
 
             # Load the specific model for the stock, or fallback to the general model if it doesn't exist
             try:
@@ -919,11 +978,9 @@ def simulate_days(days: int,
                     f'models/LGBMmodels/{symbol}_model.pkl')
                 print(f"Using model for {symbol}")
             except Exception:
-                general_model = xgb.Booster()
-                general_model.load_model(
-                    'models/XGBmodels/all_stocks_incremental_model.pkl')
-                specific_model = general_model
-                print(f"Using general model for {symbol}")
+                print(f"Model for {symbol} not found. Training a new model...")
+                specific_model = train_model(symbol)
+                print(f"Model trained for {symbol}")
 
             # Simulate a day of trading for the stock with the specific model
             new_decisions_s, _ = stock_market_simulation(
@@ -939,8 +996,8 @@ def simulate_days(days: int,
             # Append the new decisions to the all_decisions dataframes
             all_decisions_s = pd.concat(
                 [all_decisions_s, new_decisions_s], ignore_index=True)
-            # if existing_shares == 1:
-            #     continue
+            if split_cash:
+                cash = new_decisions_s['Cash'].iloc[-1]
         except Exception as e:
             print(f"Error: {e}")
             print("====================================")
@@ -948,9 +1005,12 @@ def simulate_days(days: int,
             print("====================================")
             continue
 
-    if to_file:
-        all_decisions_s.to_csv('simResults/sim_results.csv',
-                               index=False)
+    if to_file or file_location:
+        if file_location:
+            all_decisions_s.to_csv(file_location, index=False, mode='a')
+        else:
+            all_decisions_s.to_csv('simResults/sim_results.csv',
+                                   index=False)
     return all_decisions_s
 
 
@@ -1095,12 +1155,58 @@ def simulate_day_specific(model_type: str = 'LGBM'
                                mode='a', header=False, index=False)
 
 
+def simulate_day_for_cash_app():
+    portfolio = pd.read_csv("CashAppIntegration/portfolio.csv")
+    daysimulation = pd.DataFrame(columns=['Stock Name','Day','Action','Stock Price','Cash','Shares Held','Portfolio Value','Date'])
+    cash = portfolio['Cash'].iloc[-1]
+    for stock in portfolio['Stock Name'].unique():
+        try:
+            model = joblib.load(f"models/LGBMmodels/{stock}_model.pkl")
+        except FileNotFoundError:
+            print(f"Training model for {stock}...")
+            model = train_model(stock)
+            joblib.dump(model, f"models/LGBMmodels/{stock}_model.pkl")
+        
+        updated_stock_df = get_stock_data(stock)
+        updated_stock_df = updated_stock_df.tail(1)
+
+        day = (portfolio[portfolio['Stock Name'] == stock]['Day'].iloc[-1]) + 1
+
+        new_row, _ = stock_market_simulation(
+            model,
+            initial_cash=cash,
+            days=1,
+            stock=updated_stock_df,
+            existing_shares=portfolio[portfolio['Stock Name'] == stock]['Shares Held'].iloc[-1],
+            oneDay=day,
+            descision=portfolio[portfolio['Stock Name'] == stock]
+        )
+        cash = new_row['Cash'].iloc[-1]
+        daysimulation = pd.concat([daysimulation, new_row])
+    
+    # Save the updated portfolio back to the CSV file  
+    daysimulation['Cash'] = daysimulation['Cash'].iloc[-1]     
+    daysimulation.fillna(0, inplace=True)
+    daysimulation.to_csv("CashAppIntegration/portfolio.csv", index=False, mode='a', header=False)
+    return portfolio
+
+
+
+
 if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_dir)
     warnings.filterwarnings('ignore')
     # Simulate one day for all stocks, continuing from previous cash balances
-    # simulate_days(256, to_file=True, massTrade=True, cash=10000)
-    simulate_day_specific('XGB')
-    simulate_day_specific('LGBM')
+    portfolio = pd.read_csv('CashAppIntegration/portfolio.csv')
+    simulate_days(5,
+                  to_file=True,
+                  massTrade=True,
+                  cash=10000,
+                  file_location='simResults/1_day_test.csv',
+                  symbols = portfolio['Stock Name'].unique()
+)
+    # simulate_day_for_cash_app()
+    # simulate_day_specific('LGBM')
     # train_models()
+    # scale_and_obtain_data('AAPL')
