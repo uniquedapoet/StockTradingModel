@@ -5,6 +5,8 @@ This project demonstrates the development of a **stock market trading model** de
 
 The purpose of this repository is to showcase the methodology, data analysis, and results of this stock trading model, rather than serving as a reusable Python module.
 
+**Navigate to [Stock_Trading_Model_Report.ipynb](Stock_Trading_Model_Report.ipynb) too see Code Showcasing Development Process and Model Demonstration**
+
 ## Key Features:
 - **Data Source**: The model uses historical stock price data fetched from **Yahoo Finance** via the `yfinance` API.
 - **Technical Indicators**: A variety of indicators, such as **moving averages (MA)**, **relative strength index (RSI)**, and **Bollinger Bands**, were employed to understand price trends, momentum, and volatility.
